@@ -3,18 +3,20 @@ mod direction;
 mod humanoid;
 mod sprites;
 
-use std::time::Duration;
+use std::{ops::Deref, time::Duration};
 
 use tetra::{Event, graphics::{animation::Animation, scaling::{ScalingMode, ScreenScaler}}, input::{self, Key}};
 use tetra::graphics::{self, Color, DrawParams, Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::{Context, ContextBuilder, State};
+use tetra::time;
+use tetra::window;
 
 use direction::Direction;
 use humanoid::Humanoid;
 
-const WIDTH: f32 = 640.0;
-const HEIGHT: f32 = 640.0;
+const WIDTH: i32 = 640;
+const HEIGHT: i32 = 640;
 
 struct GameState {
     scaler: ScreenScaler,
@@ -24,6 +26,8 @@ struct GameState {
 
 impl GameState {
     fn new(ctx: &mut Context) -> tetra::Result<GameState> {
+        
+        
         let player_texture = Texture::from_file_data(ctx, sprites::HERO)?;
         let grunt_texture = Texture::from_file_data(ctx, sprites::HERO_INVINCIBLE)?;
 
@@ -33,7 +37,7 @@ impl GameState {
         Ok(GameState {
             player,
             grunt,
-            scaler: ScreenScaler::with_window_size(ctx, 640, 640, ScalingMode::ShowAllPixelPerfect)?,
+            scaler: ScreenScaler::with_window_size(ctx, WIDTH, HEIGHT, ScalingMode::ShowAllPixelPerfect)?,
         })
     }
 
@@ -47,6 +51,8 @@ impl GameState {
                 ScalingMode::Crop => ScalingMode::CropPixelPerfect,
                 ScalingMode::CropPixelPerfect => ScalingMode::Fixed,
             };
+
+            println!("[LOG] Scaling mode changed to {:?}", next);
 
             self.scaler.set_mode(next);
         }
@@ -66,6 +72,15 @@ impl State for GameState {
         graphics::reset_canvas(ctx);
         graphics::clear(ctx, Color::BLACK);
         self.scaler.draw(ctx);
+
+
+        window::set_title(
+            ctx,
+            &format!(
+                "joguinho - {:.0} FPS",
+                time::get_fps(ctx)
+            ),
+        );
 
         Ok(())
     }
@@ -91,6 +106,7 @@ impl State for GameState {
 fn main() -> tetra::Result {
     ContextBuilder::new("my lil game", 640, 640)
         .quit_on_escape(true)
+        .debug_info(true)
         .resizable(true)
         .build()?
         .run(GameState::new)

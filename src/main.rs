@@ -75,7 +75,7 @@ impl GameState {
 impl State for GameState {
     fn draw(&mut self, ctx: &mut Context) -> tetra::Result {
         graphics::set_canvas(ctx, self.scaler.canvas());
-        graphics::clear(ctx, Color::rgb(89.0/255.0, 187.0/255.0, 117.0/255.0));
+        graphics::clear(ctx, Color::rgb(118.0/255.0, 197.0/255.0, 100.0/255.0));
 
         self.background.draw(ctx);
         self.player.advance_animation(ctx);

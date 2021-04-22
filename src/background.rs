@@ -3,6 +3,16 @@ use tetra::{Context, graphics::{Color, DrawParams, Texture}, math::Vec2};
 use crate::sprites;
 
 pub struct Background {
+
+    grass_left: Texture,
+    grass_lower_right: Texture,
+    grass_lower_left: Texture,
+    grass_lower: Texture,
+    grass_top_left: Texture,
+    grass_top: Texture,
+    grass_top_right: Texture,
+    grass_right: Texture,
+
     grass_1: Texture,
     grass_2: Texture,
     rock_1: Texture,
@@ -47,8 +57,16 @@ impl Background {
         ];
 
         Self {
-            grass_1: Texture::from_file_data(ctx, sprites::GRASS1).unwrap(),
-            grass_2: Texture::from_file_data(ctx, sprites::GRASS2).unwrap(),
+            grass_left: Texture::from_file_data(ctx, sprites::GRASS_LEFT).unwrap(),
+            grass_lower: Texture::from_file_data(ctx, sprites::GRASS_LOWER).unwrap(),
+            grass_lower_left: Texture::from_file_data(ctx, sprites::GRASS_LOWER_LEFT).unwrap(),
+            grass_lower_right: Texture::from_file_data(ctx, sprites::GRASS_LOWER_RIGHT).unwrap(),
+            grass_top_left: Texture::from_file_data(ctx, sprites::GRASS_TOP_LEFT).unwrap(),
+            grass_top: Texture::from_file_data(ctx, sprites::GRASS_TOP).unwrap(),
+            grass_top_right: Texture::from_file_data(ctx, sprites::GRASS_TOP_RIGHT).unwrap(),
+            grass_right: Texture::from_file_data(ctx, sprites::GRASS_RIGHT).unwrap(),
+            grass_1: Texture::from_file_data(ctx, sprites::GRASS_DETAIL_1).unwrap(),
+            grass_2: Texture::from_file_data(ctx, sprites::GRASS_DETAIL_2).unwrap(),
             rock_1: Texture::from_file_data(ctx, sprites::ROCK1).unwrap(),
             rock_2: Texture::from_file_data(ctx, sprites::ROCK2).unwrap(),
             grass_1_points,
@@ -60,6 +78,30 @@ impl Background {
 
     pub fn draw(&self, ctx: &mut Context) {
         let scale = Vec2::new(1.5, 1.5);
+
+    
+        for x in (32..725).step_by(75) {
+            self.grass_lower.draw(ctx, DrawParams::new().position(Vec2::new(x as f32, 768.0)));
+        }
+
+        for y in (32..768).step_by(32) {
+            self.grass_left.draw(ctx, DrawParams::new().position(Vec2::new(0.0, y as f32)));
+        }
+
+        for y in (32..768).step_by(32) {
+            self.grass_right.draw(ctx, DrawParams::new().position(Vec2::new(768., y as f32)));
+        }
+
+        for x in (32..770).step_by(70) {
+            self.grass_top.draw(ctx, DrawParams::new().position(Vec2::new(x as f32, 0.0)));
+        }
+
+        self.grass_lower_left.draw(ctx, DrawParams::new().position(Vec2::new(0.0, 768.0)));
+        self.grass_lower_right.draw(ctx, DrawParams::new().position(Vec2::new(768.0, 768.0)));
+        self.grass_top_left.draw(ctx, DrawParams::new().position(Vec2::new(0., 0.)));
+        self.grass_top_right.draw(ctx, DrawParams::new().position(Vec2::new(768., 0.0)));
+
+
         for point in &self.grass_1_points {
             self.grass_1.draw(ctx, DrawParams::new().position(*point).scale(scale).color(Color::BLUE));
         }

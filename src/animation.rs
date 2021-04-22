@@ -51,23 +51,17 @@ impl HumanoidAnimation {
     }
 }
 
-pub struct FireballAnimation {
-    animation: Animation,
-}
+pub struct FireballAnimation;
 
 impl FireballAnimation {
-    pub fn new (texture: Texture) -> Self {
-        let animation = Animation::new(
+    pub fn make_animation (texture: Texture) -> Animation {
+        Animation::new(
             texture,
             vec![
                 Rectangle::new(0., 0., 16., 16.),
                 Rectangle::new(16., 0., 16., 16.),
             ],
             Duration::from_secs_f64(0.25)
-        );
-
-        Self {
-            animation
-        }
+        )
     }
 }

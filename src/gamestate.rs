@@ -108,11 +108,14 @@ impl State for GameState {
         graphics::clear(ctx, Color::rgb(118.0/255.0, 197.0/255.0, 100.0/255.0));
 
         self.background.draw(ctx);
-        self.player.advance_animation(ctx);
-        self.grunt.advance_animation(ctx);
-        self.player.draw(ctx);
 
+        self.player.advance_animation(ctx);
+        self.fireball_mgr.advance_animation(ctx);
+        self.grunt.advance_animation(ctx);
+
+        self.player.draw(ctx);
         self.grunt.draw(ctx);
+        self.fireball_mgr.draw(ctx);
 
         graphics::reset_canvas(ctx);
         graphics::clear(ctx, Color::BLACK);
@@ -125,7 +128,11 @@ impl State for GameState {
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         self.check_for_scale_change(ctx);
-        let _dir = Self::check_for_fire(ctx);
+        
+        match Self::check_for_fire(ctx) {
+            Some(angle) => self.fireball_mgr.add_fireball(angle, self.player.get_position()),
+            None => {}
+        }
 
         self.player.update(ctx);
         self.grunt.update(ctx);

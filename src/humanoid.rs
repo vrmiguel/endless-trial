@@ -81,4 +81,8 @@ impl Humanoid {
     pub fn set_direction(&mut self, dir: Direction) {
         self.direction = dir;
     }
+
+    pub fn get_position(&self) -> Vec2<f32> {
+        self.position
+    }
 }

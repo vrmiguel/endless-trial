@@ -15,3 +15,5 @@ pub const GRASS_TOP_RIGHT: &[u8] = include_bytes!("../resources/sprites/grass/gr
 pub const GRASS_RIGHT: &[u8] = include_bytes!("../resources/sprites/grass/grass-right.png");
 pub const GRASS_DETAIL_1: &[u8] = include_bytes!("../resources/sprites/grass/grass1.png");
 pub const GRASS_DETAIL_2: &[u8] = include_bytes!("../resources/sprites/grass/grass2.png");
+
+pub const FIREBALL: &[u8] = include_bytes!("../resources/sprites/fireball/fireball.png");

@@ -53,7 +53,6 @@ impl Background {
             Vec2::new(120.0, 502.),
             Vec2::new(320.0, 132.),
             Vec2::new(650.0, 660.),
-            Vec2::new(775.0, 460.),
         ];
 
         Self {

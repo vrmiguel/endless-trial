@@ -1,8 +1,8 @@
-use tetra::graphics::{Texture, animation::Animation};
-use tetra::Context;
-use tetra::math::Vec2;
 use tetra::graphics::DrawParams;
+use tetra::graphics::{animation::Animation, Texture};
 use tetra::input::{self, Key};
+use tetra::math::Vec2;
+use tetra::Context;
 
 use crate::animation::HumanoidAnimation;
 use crate::Direction;
@@ -22,7 +22,7 @@ impl Humanoid {
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
             position,
-            velocity
+            velocity,
         }
     }
 
@@ -30,23 +30,22 @@ impl Humanoid {
         match self.direction {
             Direction::North => self.animation.backside.advance(ctx),
             Direction::West | Direction::East => self.animation.leftside.advance(ctx),
-            Direction::South => self.animation.frontside.advance(ctx)
+            Direction::South => self.animation.frontside.advance(ctx),
         }
     }
 
     fn get_animation_ref(&self) -> (&Animation, Vec2<f32>) {
-        let scale = Vec2::new(5.0, 5.0);
-        let scale_reverse = Vec2::new(-5.0, 5.0);
+        let scale = Vec2::new(3., 3.);
+        let scale_reverse = Vec2::new(-3., 3.);
         match self.direction {
             Direction::North => (&self.animation.backside, scale),
-            Direction::West  => (&self.animation.leftside, scale),
-            Direction::East  => (&self.animation.leftside, scale_reverse),
-            Direction::South => (&self.animation.frontside, scale)
+            Direction::West => (&self.animation.leftside, scale),
+            Direction::East => (&self.animation.leftside, scale_reverse),
+            Direction::South => (&self.animation.frontside, scale),
         }
     }
 
     pub fn draw(&self, ctx: &mut Context) {
-
         let (animation, scale) = self.get_animation_ref();
 
         animation.draw(

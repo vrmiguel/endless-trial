@@ -1,25 +1,33 @@
 use graphics::Color;
-use tetra::{Context, Event, State, graphics::{Texture, scaling::{ScalingMode, ScreenScaler}}, input::{self, Key}, math::Vec2};
-use tetra::graphics;
-use tetra::window;
-use tetra::time;
 use std::time::Duration;
+use tetra::graphics;
+use tetra::time;
+use tetra::window;
+use tetra::{
+    graphics::{
+        scaling::{ScalingMode, ScreenScaler},
+        Texture,
+    },
+    input::{self, Key},
+    math::Vec2,
+    Context, Event, State,
+};
 
-use crate::{HEIGHT, WIDTH, background::Background, fireball::FireballManager, humanoid::Humanoid, sprites};
-use crate::{left, right, up, down};
+use crate::{
+    background::Background, fireball::FireballManager, humanoid::Humanoid, sprites, HEIGHT, WIDTH,
+};
+use crate::{down, left, right, up};
 
 pub struct GameState {
     scaler: ScreenScaler,
     background: Background,
     player: Humanoid,
     grunt: Humanoid,
-    fireball_mgr: FireballManager
+    fireball_mgr: FireballManager,
 }
-
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> tetra::Result<GameState> {
-
         let player_texture = Texture::from_file_data(ctx, sprites::HERO)?;
         let grunt_texture = Texture::from_file_data(ctx, sprites::HERO_INVINCIBLE)?;
 
@@ -37,7 +45,7 @@ impl GameState {
                 HEIGHT,
                 ScalingMode::ShowAllPixelPerfect,
             )?,
-            fireball_mgr: FireballManager::new(ctx)
+            fireball_mgr: FireballManager::new(ctx),
         })
     }
 
@@ -66,11 +74,11 @@ impl GameState {
             (true, false, true, false) => {
                 // Left and Up -> 135 deg
                 Some(135.0)
-            },
+            }
             (true, false, false, true) => {
                 // Left and Down -> 225 deg
                 Some(225.0)
-            },
+            }
             (false, true, false, true) => {
                 // Right and Down -> 315 deg
                 Some(315.0)
@@ -106,7 +114,7 @@ impl GameState {
 impl State for GameState {
     fn draw(&mut self, ctx: &mut Context) -> tetra::Result {
         graphics::set_canvas(ctx, self.scaler.canvas());
-        graphics::clear(ctx, Color::rgb(118.0/255.0, 197.0/255.0, 100.0/255.0));
+        graphics::clear(ctx, Color::rgb(118.0 / 255.0, 197.0 / 255.0, 100.0 / 255.0));
 
         self.background.draw(ctx);
 
@@ -134,7 +142,9 @@ impl State for GameState {
 
         if time_since_last_throw > Duration::from_secs_f64(0.25) {
             match Self::check_for_fire(ctx) {
-                Some(angle) => self.fireball_mgr.add_fireball(angle, self.player.get_position()),
+                Some(angle) => self
+                    .fireball_mgr
+                    .add_fireball(angle, self.player.get_position()),
                 None => {}
             }
         }

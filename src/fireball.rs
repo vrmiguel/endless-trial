@@ -1,10 +1,13 @@
 use std::collections::HashMap;
-use std::time::{Instant};
+use std::time::Instant;
 
-use tetra::{Context, graphics::{DrawParams, Rectangle, Texture, animation::Animation}, math::Vec2};
+use tetra::{
+    graphics::{animation::Animation, DrawParams, Rectangle, Texture},
+    math::Vec2,
+    Context,
+};
 
-
-use crate::{DEG_TO_RAD, animation::FireballAnimation, sprites::FIREBALL};
+use crate::{animation::FireballAnimation, sprites::FIREBALL, DEG_TO_RAD};
 
 #[derive(Clone)]
 pub struct Fireball {
@@ -29,13 +32,14 @@ pub struct FireballManager {
 
 impl FireballManager {
     pub fn new(ctx: &mut Context) -> Self {
-        let texture = Texture::from_file_data(ctx, FIREBALL).expect("couldn't read the fireball sprite");
+        let texture =
+            Texture::from_file_data(ctx, FIREBALL).expect("couldn't read the fireball sprite");
         let animation = FireballAnimation::make_animation(texture);
 
         Self {
             fireballs: vec![],
             animation,
-            last_thrown_time: std::time::Instant::now()
+            last_thrown_time: std::time::Instant::now(),
         }
     }
 
@@ -44,11 +48,11 @@ impl FireballManager {
         self.last_thrown_time = Instant::now();
 
         // We'll start the fireball 5 units away from the player in the given direction
-        let position = position + Vec2::new(f32::cos(angle_rad) * 5., -f32::sin(angle_rad) * 5.);
+        let position = position + Vec2::new(f32::cos(angle_rad), -f32::sin(angle_rad));
         let fireball = Fireball {
             position,
             angle_rad,
-            velocity: Vec2::new(5., 5.)
+            velocity: Vec2::new(5., 5.),
         };
 
         self.fireballs.push(fireball);
@@ -87,13 +91,21 @@ impl FireballManager {
 
         for fireball in &mut self.fireballs {
             let ang_rad = fireball.angle_rad;
-            fireball.position += Vec2::new(f32::cos(ang_rad), -f32::sin(ang_rad)) * fireball.velocity;
+            fireball.position +=
+                Vec2::new(f32::cos(ang_rad), -f32::sin(ang_rad)) * fireball.velocity;
         }
     }
 
     pub fn draw(&self, ctx: &mut Context) {
         for fireball in &self.fireballs {
-            self.animation.draw(ctx, DrawParams::new().position(fireball.position))
+            println!("angle_Rad: {}", fireball.angle_rad);
+            self.animation
+                .draw(ctx, 
+                    DrawParams::new()
+                        .position(fireball.position)
+                        .scale(Vec2::new(0.5, 0.5))
+                        .rotation(fireball.angle_rad)
+                )
         }
     }
 }

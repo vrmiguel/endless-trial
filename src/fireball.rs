@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::time::{Instant};
 
 use tetra::{Context, graphics::{DrawParams, Rectangle, Texture, animation::Animation}, math::Vec2};
+
 
 use crate::{DEG_TO_RAD, animation::FireballAnimation, sprites::FIREBALL};
 
@@ -22,6 +24,7 @@ pub struct FireballManager {
     // linked_list_remove is currently unstable (as of rustc 1.51)
     fireballs: Vec<Fireball>,
     animation: Animation,
+    pub last_thrown_time: Instant,
 }
 
 impl FireballManager {
@@ -32,14 +35,16 @@ impl FireballManager {
         Self {
             fireballs: vec![],
             animation,
+            last_thrown_time: std::time::Instant::now()
         }
     }
 
     pub fn add_fireball(&mut self, angle: f32, position: Vec2<f32>) {
         let angle_rad = angle * DEG_TO_RAD;
+        self.last_thrown_time = Instant::now();
 
         // We'll start the fireball 5 units away from the player in the given direction
-        let position = position + Vec2::new(f32::sin(angle_rad) * 5., f32::cos(angle_rad) * 5.);
+        let position = position + Vec2::new(f32::cos(angle_rad) * 5., -f32::sin(angle_rad) * 5.);
         let fireball = Fireball {
             position,
             angle_rad,
@@ -82,7 +87,7 @@ impl FireballManager {
 
         for fireball in &mut self.fireballs {
             let ang_rad = fireball.angle_rad;
-            fireball.position += Vec2::new(f32::sin(ang_rad), f32::cos(ang_rad)) * fireball.velocity;
+            fireball.position += Vec2::new(f32::cos(ang_rad), -f32::sin(ang_rad)) * fireball.velocity;
         }
     }
 

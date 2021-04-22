@@ -3,6 +3,7 @@ use tetra::{Context, Event, State, graphics::{Texture, scaling::{ScalingMode, Sc
 use tetra::graphics;
 use tetra::window;
 use tetra::time;
+use std::time::Duration;
 
 use crate::{HEIGHT, WIDTH, background::Background, fireball::FireballManager, humanoid::Humanoid, sprites};
 use crate::{left, right, up, down};
@@ -128,10 +129,14 @@ impl State for GameState {
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         self.check_for_scale_change(ctx);
-        
-        match Self::check_for_fire(ctx) {
-            Some(angle) => self.fireball_mgr.add_fireball(angle, self.player.get_position()),
-            None => {}
+
+        let time_since_last_throw = self.fireball_mgr.last_thrown_time.elapsed();
+
+        if time_since_last_throw > Duration::from_secs_f64(0.25) {
+            match Self::check_for_fire(ctx) {
+                Some(angle) => self.fireball_mgr.add_fireball(angle, self.player.get_position()),
+                None => {}
+            }
         }
 
         self.player.update(ctx);

@@ -4,7 +4,7 @@ use tetra::input::{self, Key};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::animation::HumanoidAnimation;
+use crate::{RAD_TO_DEG, animation::HumanoidAnimation};
 use crate::Direction;
 
 pub enum HumanoidType {
@@ -93,14 +93,38 @@ impl Humanoid {
         self.position += self.velocity;
     }
 
+    pub fn look_to(&mut self, mut direction_deg: f32) {
+
+        let direction = |mut angle: f32|-> i32 {
+            if angle < 0. {
+                angle += 360.;
+            }
+            let angle = angle as i32;
+            (45 + angle) % 360 / 90
+        };
+        
+        self.direction = match direction(direction_deg) {
+            0 => Direction::East,
+            1 => Direction::North,
+            2 => Direction::West,
+            3 => Direction::South,
+            _ => unreachable!()
+        }
+    }
+
     pub fn head_to(&mut self, destination: Vec2<f32>) {
         
-        let delta_x = destination.x - self.position.x;
-        let delta_y = self.position.y - destination.y;
+        let old_pos = self.position;
+
+        let delta_x = destination.x - old_pos.x;
+        let delta_y = old_pos.y - destination.y;
         let theta_rad = f32::atan2(delta_y, delta_x);
         
         self.position +=
                 Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad)) * self.velocity;
+        
+        println!("DEG: {}", theta_rad * RAD_TO_DEG);
+        self.look_to(theta_rad * RAD_TO_DEG);
     }
 
     pub fn set_direction(&mut self, dir: Direction) {

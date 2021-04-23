@@ -16,6 +16,7 @@ use gamestate::GameState;
 const WIDTH: i32 = 800;
 const HEIGHT: i32 = 800;
 const DEG_TO_RAD: f32 = 3.14159265358979323846 / 180.0;
+const RAD_TO_DEG: f32 = 180.0 / 3.14159265358979323846;
 
 const VERSION: &str = "0.1.0";
 

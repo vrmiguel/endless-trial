@@ -60,9 +60,9 @@ impl EnemyManager {
         time_since_last_spawn > Duration::from_secs_f64(1.5) 
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, heading_to: Vec2<f32>) {
         for enemy in &mut self.enemies {
-            enemy.update();
+            enemy.head_to(heading_to);
         }
     }
 

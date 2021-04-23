@@ -93,8 +93,14 @@ impl Humanoid {
         self.position += self.velocity;
     }
 
-    pub fn update(&mut self) {
-        self.position += self.velocity;
+    pub fn head_to(&mut self, destination: Vec2<f32>) {
+        
+        let delta_x = destination.x - self.position.x;
+        let delta_y = self.position.y - destination.y;
+        let theta_rad = f32::atan2(delta_y, delta_x);
+        
+        self.position +=
+                Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad)) * self.velocity;
     }
 
     pub fn set_direction(&mut self, dir: Direction) {

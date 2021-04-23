@@ -159,7 +159,7 @@ impl State for GameState {
 
         // Checks for WASD presses and updates player location 
         self.player.update_from_key_press(ctx);
-        self.enemy_mgr.update();
+        self.enemy_mgr.update(self.player.get_position());
 
         Ok(())
     }

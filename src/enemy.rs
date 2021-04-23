@@ -67,6 +67,12 @@ impl EnemyManager {
         }
     }
 
+
+
+    pub fn enemies_ref(&self) -> &[Humanoid] {
+        &*self.enemies
+    }
+
     pub fn draw(& self, ctx: &mut Context) {
         for enemy in &self.enemies {
             enemy.draw(ctx);

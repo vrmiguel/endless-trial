@@ -12,13 +12,7 @@ use tetra::{
     Context, Event, State,
 };
 
-use crate::{
-    background::Background,
-    enemy::EnemyManager,
-    fireball::FireballManager,
-    humanoid::{Humanoid, HumanoidType},
-    sprites, HEIGHT, WIDTH,
-};
+use crate::{HEIGHT, WIDTH, background::Background, collisionck, enemy::EnemyManager, fireball::FireballManager, humanoid::{Humanoid, HumanoidType}, sprites};
 use crate::{down, left, right, up};
 
 pub struct GameState {
@@ -143,6 +137,10 @@ impl State for GameState {
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         self.check_for_scale_change(ctx);
+
+        if collisionck::player_collided_with_enemy(self.player.get_position(), self.enemy_mgr.enemies_ref()) {
+            println!("Player collision detected!!");
+        }
 
         if self.fireball_mgr.can_throw() {
             match Self::check_for_fire(ctx) {

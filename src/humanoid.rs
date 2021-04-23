@@ -93,7 +93,7 @@ impl Humanoid {
         self.position += self.velocity;
     }
 
-    pub fn look_to(&mut self, mut direction_deg: f32) {
+    pub fn look_to(&mut self, direction_deg: f32) {
 
         let direction = |mut angle: f32|-> i32 {
             if angle < 0. {
@@ -123,7 +123,6 @@ impl Humanoid {
         self.position +=
                 Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad)) * self.velocity;
         
-        println!("DEG: {}", theta_rad * RAD_TO_DEG);
         self.look_to(theta_rad * RAD_TO_DEG);
     }
 

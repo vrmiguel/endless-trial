@@ -4,6 +4,7 @@ mod direction;
 mod enemy;
 mod fireball;
 mod gamestate;
+mod collisionck;
 mod humanoid;
 mod macros;
 mod sprites;

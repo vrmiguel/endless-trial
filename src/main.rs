@@ -1,6 +1,7 @@
 mod animation;
 mod background;
 mod direction;
+mod enemy;
 mod fireball;
 mod gamestate;
 mod humanoid;

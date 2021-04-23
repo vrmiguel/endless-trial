@@ -57,7 +57,7 @@ impl FireballAnimation {
     pub fn make_animation(texture: Texture) -> Animation {
         Animation::new(
             texture,
-            Rectangle::row(0., 0., 64., 64.).take(5).collect(),            
+            Rectangle::row(0., 0., 64., 64.).take(5).collect(),
             Duration::from_secs_f64(0.25),
         )
     }

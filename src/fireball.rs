@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 use std::time::Instant;
 
 use tetra::{
-    graphics::{animation::Animation, DrawParams, Rectangle, Texture},
+    graphics::{animation::Animation, DrawParams, Texture},
     math::Vec2,
     Context,
 };
@@ -27,7 +27,7 @@ pub struct FireballManager {
     // linked_list_remove is currently unstable (as of rustc 1.51)
     fireballs: Vec<Fireball>,
     animation: Animation,
-    pub last_thrown_time: Instant,
+    last_thrown_time: Instant,
 }
 
 impl FireballManager {
@@ -41,6 +41,12 @@ impl FireballManager {
             animation,
             last_thrown_time: std::time::Instant::now(),
         }
+    }
+
+    pub fn can_throw(&self) -> bool {
+        let time_since_last_throw = self.last_thrown_time.elapsed();
+
+        time_since_last_throw > Duration::from_secs_f64(0.25) 
     }
 
     pub fn add_fireball(&mut self, angle: f32, position: Vec2<f32>) {
@@ -84,6 +90,7 @@ impl FireballManager {
         self.fireballs = fireballs;
     }
 
+    // TODO: rename to update?
     pub fn advance_animation(&mut self, ctx: &mut Context) {
         self.animation.advance(ctx);
 
@@ -98,14 +105,13 @@ impl FireballManager {
 
     pub fn draw(&self, ctx: &mut Context) {
         for fireball in &self.fireballs {
-            println!("angle_Rad: {}", fireball.angle_rad);
-            self.animation
-                .draw(ctx, 
-                    DrawParams::new()
-                        .position(fireball.position)
-                        .scale(Vec2::new(0.5, 0.5))
-                        .rotation(fireball.angle_rad)
-                )
+            self.animation.draw(
+                ctx,
+                DrawParams::new()
+                    .position(fireball.position)
+                    .scale(Vec2::new(0.5, 0.5))
+                    .rotation(fireball.angle_rad),
+            )
         }
     }
 }

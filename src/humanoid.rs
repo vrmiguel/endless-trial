@@ -7,22 +7,37 @@ use tetra::Context;
 use crate::animation::HumanoidAnimation;
 use crate::Direction;
 
+pub enum HumanoidType {
+    Player,
+    BasicEnemy,
+    StrongerEnemy,
+    BadassEnemy,
+    Boss,
+}
+
 pub struct Humanoid {
     health_points: u16,
     direction: Direction,
     animation: HumanoidAnimation,
     position: Vec2<f32>,
     velocity: Vec2<f32>,
+    kind: HumanoidType,
 }
 
 impl Humanoid {
-    pub fn new(texture: Texture, position: Vec2<f32>, velocity: Vec2<f32>) -> Self {
+    pub fn new(
+        texture: Texture,
+        position: Vec2<f32>,
+        velocity: Vec2<f32>,
+        kind: HumanoidType,
+    ) -> Self {
         Self {
             health_points: 100,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
             position,
             velocity,
+            kind,
         }
     }
 
@@ -57,7 +72,7 @@ impl Humanoid {
         );
     }
 
-    pub fn update(&mut self, ctx: &mut Context) {
+    pub fn update_from_key_press(&mut self, ctx: &mut Context) {
         if input::is_key_down(ctx, Key::A) {
             self.velocity.x = (self.velocity.x - 0.5).max(-5.0);
             self.set_direction(Direction::West);
@@ -75,6 +90,10 @@ impl Humanoid {
             self.velocity.y -= self.velocity.y.abs().min(0.5) * self.velocity.y.signum();
         }
 
+        self.position += self.velocity;
+    }
+
+    pub fn update(&mut self) {
         self.position += self.velocity;
     }
 

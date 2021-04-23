@@ -1,5 +1,4 @@
 use graphics::Color;
-use std::time::Duration;
 use tetra::graphics;
 use tetra::time;
 use tetra::window;
@@ -14,7 +13,11 @@ use tetra::{
 };
 
 use crate::{
-    background::Background, fireball::FireballManager, humanoid::Humanoid, sprites, HEIGHT, WIDTH,
+    background::Background,
+    enemy::EnemyManager,
+    fireball::FireballManager,
+    humanoid::{Humanoid, HumanoidType},
+    sprites, HEIGHT, WIDTH,
 };
 use crate::{down, left, right, up};
 
@@ -22,22 +25,24 @@ pub struct GameState {
     scaler: ScreenScaler,
     background: Background,
     player: Humanoid,
-    grunt: Humanoid,
     fireball_mgr: FireballManager,
+    enemy_mgr: EnemyManager,
 }
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> tetra::Result<GameState> {
         let player_texture = Texture::from_file_data(ctx, sprites::HERO)?;
-        let grunt_texture = Texture::from_file_data(ctx, sprites::HERO_INVINCIBLE)?;
 
-        let player = Humanoid::new(player_texture, Vec2::new(240.0, 160.0), Vec2::new(0.0, 0.0));
-        let grunt = Humanoid::new(grunt_texture, Vec2::new(120.0, 120.0), Vec2::new(0.0, 0.0));
+        let player = Humanoid::new(
+            player_texture,
+            Vec2::new(240.0, 160.0),
+            Vec2::new(0.0, 0.0),
+            HumanoidType::Player,
+        );
         let background = Background::new(ctx);
 
         Ok(GameState {
             player,
-            grunt,
             background,
             scaler: ScreenScaler::with_window_size(
                 ctx,
@@ -46,6 +51,7 @@ impl GameState {
                 ScalingMode::ShowAllPixelPerfect,
             )?,
             fireball_mgr: FireballManager::new(ctx),
+            enemy_mgr: EnemyManager::new(),
         })
     }
 
@@ -66,6 +72,7 @@ impl GameState {
         }
     }
 
+    // TODO: there's probably a nicer solution to this with algebra
     pub fn check_for_fire(ctx: &mut Context) -> Option<f32> {
         match (left!(ctx), right!(ctx), up!(ctx), down!(ctx)) {
             // These first cases are kind of nonsensical so I'm going to explicitly ignore them
@@ -120,11 +127,10 @@ impl State for GameState {
 
         self.player.advance_animation(ctx);
         self.fireball_mgr.advance_animation(ctx);
-        self.grunt.advance_animation(ctx);
 
         self.player.draw(ctx);
-        self.grunt.draw(ctx);
         self.fireball_mgr.draw(ctx);
+        self.enemy_mgr.draw(ctx);
 
         graphics::reset_canvas(ctx);
         graphics::clear(ctx, Color::BLACK);
@@ -138,9 +144,7 @@ impl State for GameState {
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         self.check_for_scale_change(ctx);
 
-        let time_since_last_throw = self.fireball_mgr.last_thrown_time.elapsed();
-
-        if time_since_last_throw > Duration::from_secs_f64(0.25) {
+        if self.fireball_mgr.can_throw() {
             match Self::check_for_fire(ctx) {
                 Some(angle) => self
                     .fireball_mgr
@@ -149,8 +153,13 @@ impl State for GameState {
             }
         }
 
-        self.player.update(ctx);
-        self.grunt.update(ctx);
+        if self.enemy_mgr.can_spawn() {
+            self.enemy_mgr.spawn_enemy(ctx, HumanoidType::BasicEnemy);
+        }
+
+        // Checks for WASD presses and updates player location 
+        self.player.update_from_key_press(ctx);
+        self.enemy_mgr.update();
 
         Ok(())
     }

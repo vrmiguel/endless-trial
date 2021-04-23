@@ -19,3 +19,13 @@ pub const GRASS_DETAIL_1: &[u8] = include_bytes!("../resources/sprites/grass/gra
 pub const GRASS_DETAIL_2: &[u8] = include_bytes!("../resources/sprites/grass/grass2.png");
 
 pub const FIREBALL: &[u8] = include_bytes!("../resources/sprites/fireball/fireball.png");
+
+pub const BASIC_GRUNTS: &[&[u8]] = &[
+    include_bytes!("../resources/sprites/basic-grunts/grunt1.png"),
+    include_bytes!("../resources/sprites/basic-grunts/grunt2.png"),
+    include_bytes!("../resources/sprites/basic-grunts/grunt3.png"),
+    include_bytes!("../resources/sprites/basic-grunts/grunt4.png"),
+    include_bytes!("../resources/sprites/basic-grunts/grunt5.png"),
+    include_bytes!("../resources/sprites/basic-grunts/grunt6.png"),
+    include_bytes!("../resources/sprites/basic-grunts/grunt7.png"),
+];

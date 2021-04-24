@@ -12,7 +12,7 @@ use tetra::{
     Context, Event, State,
 };
 
-use crate::{HEIGHT, WIDTH, background::Background, collisionck, enemy::EnemyManager, fireball::FireballManager, humanoid::{Humanoid, HumanoidType}, sprites};
+use crate::{HEIGHT, WIDTH, background::Background, enemy::EnemyManager, fireball::FireballManager, humanoid::{Humanoid, HumanoidType}, sprites};
 use crate::{down, left, right, up};
 
 pub struct GameState {
@@ -161,6 +161,7 @@ impl State for GameState {
 
         // Checks for WASD presses and updates player location 
         self.player.update_from_key_press(ctx);
+
         self.enemy_mgr.update(ctx, self.player.get_position());
 
         Ok(())

@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use rand::rngs::StdRng;
+use rand::{distributions::Uniform, prelude::Distribution, rngs::StdRng};
 use rand::seq::SliceRandom;
 use rand::Rng;
 use rand::SeedableRng;
@@ -23,6 +23,20 @@ impl EnemyManager {
             enemies: vec![],
             last_spawn_time: Instant::now(),
             avg_enemy_vel: 1.0
+        }
+    }
+
+    fn generate_spawn_location(rng: &mut StdRng) -> (f32, f32) {
+        // These unwraps here are all safe  
+        let boundary = *[0., 800.].choose(rng).unwrap();
+
+        let range = Uniform::from(0. ..= 800.);
+        let pos = range.sample(rng);
+
+        if *[true, false].choose(rng).unwrap() {
+            (pos, boundary)
+        } else {
+            (boundary, pos)
         }
     }
 
@@ -50,7 +64,9 @@ impl EnemyManager {
 
         self.avg_enemy_vel += (enemy_vel.x + enemy_vel.y)/16.0;
 
-        let enemy = Humanoid::new(texture, Vec2::new(0., 0.), enemy_vel, kind);
+        let (x,  y) = Self::generate_spawn_location(&mut rng);
+
+        let enemy = Humanoid::new(texture, Vec2::new(x, y), enemy_vel, kind);
         self.enemies.push(enemy);
     }
 

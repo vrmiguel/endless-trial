@@ -1,11 +1,11 @@
-use tetra::graphics::{DrawParams, Rectangle};
 use tetra::graphics::{animation::Animation, Texture};
+use tetra::graphics::{DrawParams, Rectangle};
 use tetra::input::{self, Key};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::{RAD_TO_DEG, animation::HumanoidAnimation};
 use crate::Direction;
+use crate::{animation::HumanoidAnimation, RAD_TO_DEG};
 
 pub enum HumanoidType {
     Player,
@@ -39,6 +39,10 @@ impl Humanoid {
             velocity,
             kind,
         }
+    }
+
+    pub fn out_of_bounds(pos: Vec2<f32>) -> bool {
+        pos.x > 800. || pos.y > 800. || pos.x < 0. || pos.y < 0.
     }
 
     pub fn advance_animation(&mut self, ctx: &mut Context) {
@@ -94,35 +98,32 @@ impl Humanoid {
     }
 
     pub fn look_to(&mut self, direction_deg: f32) {
-
-        let direction = |mut angle: f32|-> i32 {
+        let direction = |mut angle: f32| -> i32 {
             if angle < 0. {
                 angle += 360.;
             }
             let angle = angle as i32;
             (45 + angle) % 360 / 90
         };
-        
+
         self.direction = match direction(direction_deg) {
             0 => Direction::East,
             1 => Direction::North,
             2 => Direction::West,
             3 => Direction::South,
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 
     pub fn head_to(&mut self, destination: Vec2<f32>) {
-        
         let old_pos = self.position;
 
         let delta_x = destination.x - old_pos.x;
         let delta_y = old_pos.y - destination.y;
         let theta_rad = f32::atan2(delta_y, delta_x);
-        
-        self.position +=
-                Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad)) * self.velocity;
-        
+
+        self.position += Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad)) * self.velocity;
+
         self.look_to(theta_rad * RAD_TO_DEG);
     }
 

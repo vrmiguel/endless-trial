@@ -12,7 +12,13 @@ use tetra::{
     Context, Event, State,
 };
 
-use crate::{HEIGHT, WIDTH, background::Background, enemy::EnemyManager, fireball::FireballManager, humanoid::{Humanoid, HumanoidType}, sprites};
+use crate::{
+    background::Background,
+    enemy::EnemyManager,
+    fireball::FireballManager,
+    humanoid::{Humanoid, HumanoidType},
+    sprites, HEIGHT, WIDTH,
+};
 use crate::{down, left, right, up};
 
 pub struct GameState {
@@ -138,13 +144,16 @@ impl State for GameState {
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         self.check_for_scale_change(ctx);
 
-        let (collided_with_an_enemy, enemy_rects) = self.player.collided_with_bodies(self.enemy_mgr.enemies_ref());
+        let (collided_with_an_enemy, enemy_rects) = self
+            .player
+            .collided_with_bodies(self.enemy_mgr.enemies_ref());
 
         if collided_with_an_enemy {
             println!("Player collision detected!!");
         }
-    
-        self.enemy_mgr.check_for_fireball_collisions(&enemy_rects, self.fireball_mgr.fireballs_ref());
+
+        self.enemy_mgr
+            .check_for_fireball_collisions(&enemy_rects, self.fireball_mgr.fireballs_ref());
 
         if self.fireball_mgr.can_throw() {
             match Self::check_for_fire(ctx) {
@@ -159,7 +168,7 @@ impl State for GameState {
             self.enemy_mgr.spawn_enemy(ctx, HumanoidType::BasicEnemy);
         }
 
-        // Checks for WASD presses and updates player location 
+        // Checks for WASD presses and updates player location
         self.player.update_from_key_press(ctx);
 
         self.enemy_mgr.update(ctx, self.player.get_position());

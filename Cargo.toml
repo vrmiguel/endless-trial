@@ -9,3 +9,9 @@ edition = "2018"
 [dependencies]
 tetra = "0.6.3"
 rand = { version = "0.8.3", feature = "std_rng" }
+
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3

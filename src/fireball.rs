@@ -69,30 +69,9 @@ impl FireballManager {
         self.fireballs.push(fireball);
     }
 
-    // This is slow, I guess, (and ugly) but any other solution I can think of right now gets into ownership hell
     pub fn clean_up_oob(&mut self) {
-        let mut indices_to_remove = HashMap::new();
-
-        for (idx, fireball) in self.fireballs.iter().enumerate() {
-            let pos = fireball.position;
-            if Fireball::out_of_bounds(pos) {
-                indices_to_remove.insert(idx, true);
-            }
-        }
-
-        if indices_to_remove.is_empty() {
-            return;
-        }
-
-        let mut fireballs = vec![];
-        for idx in 0..self.fireballs.len() {
-            if let Some(true) = indices_to_remove.get(&idx) {
-                continue;
-            }
-            fireballs.push(self.fireballs[idx].clone());
-        }
-
-        self.fireballs = fireballs;
+        self.fireballs
+            .retain(|fireball| Fireball::out_of_bounds(fireball.position));
     }
 
     // TODO: rename to update?

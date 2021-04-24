@@ -42,7 +42,9 @@ impl Humanoid {
     }
 
     pub fn out_of_bounds(pos: Vec2<f32>) -> bool {
-        pos.x > 800. || pos.y > 800. || pos.x < 0. || pos.y < 0.
+        let width = crate::WIDTH as f32;
+        let height = crate::HEIGHT as f32;
+        pos.x > width || pos.y > height || pos.x < 0. || pos.y < 0.
     }
 
     pub fn advance_animation(&mut self, ctx: &mut Context) {
@@ -77,24 +79,42 @@ impl Humanoid {
     }
 
     pub fn update_from_key_press(&mut self, ctx: &mut Context) {
-        if input::is_key_down(ctx, Key::A) {
-            self.velocity.x = (self.velocity.x - 0.5).max(-5.0);
-            self.set_direction(Direction::West);
-        } else if input::is_key_down(ctx, Key::S) {
-            self.velocity.y = (self.velocity.y + 0.5).min(5.0);
-            self.set_direction(Direction::South);
-        } else if input::is_key_down(ctx, Key::D) {
-            self.velocity.x = (self.velocity.x + 0.5).min(5.0);
-            self.set_direction(Direction::East);
-        } else if input::is_key_down(ctx, Key::W) {
-            self.velocity.y = (self.velocity.y - 0.5).max(-5.0);
-            self.set_direction(Direction::North);
-        } else {
-            self.velocity.x -= self.velocity.x.abs().min(0.5) * self.velocity.x.signum();
-            self.velocity.y -= self.velocity.y.abs().min(0.5) * self.velocity.y.signum();
+        const HERO_SPEED: f32 = 2.1;
+        // Drag is only applied to the previous frame movement
+        const HERO_MOVING_DRAG: f32 = 1.4;
+        const HERO_STOPPING_DRAG: f32 = 1.9;
+
+        let is_key_pressed_f32 = |key| input::is_key_down(ctx, key) as u8 as f32;
+        // Movement for the axis x and y, can be -1, 0 or 1
+        // We assume that 1.0 - 1.0 is always perfectly 0.0
+        let x = is_key_pressed_f32(Key::D) - is_key_pressed_f32(Key::A);
+        let y = is_key_pressed_f32(Key::S) - is_key_pressed_f32(Key::W);
+        // Will be added to self.velocity
+        let mut new_velocity = Vec2 { x, y };
+
+        // Movement is in diagonal if both x and y contain non-zero values
+        let is_diagonal = x != 0.0 && y != 0.0;
+        // Moving in the diagonal shouldn't be faster than in vertical or horizontal, so we make
+        // sure that the length of this Vec2 is always 1 (x² + y² == 1)
+        // X and Y will equal to 0.707106...
+        //
+        // Need if because .normalize() on Vec2 {0, 0} is chaotic
+        if is_diagonal {
+            new_velocity.normalize();
         }
 
-        self.position += self.velocity;
+        // Apply drag.
+        // This way of applying drag depends on the framerate, but that's not a huge problem,
+        // because currently all our movement does.
+        if new_velocity.magnitude() == 0.0 {
+            // If no input was added, apply more drag to stop the hero
+            self.velocity /= HERO_STOPPING_DRAG;
+        } else {
+            self.velocity /= HERO_MOVING_DRAG;
+        }
+
+        self.velocity += new_velocity;
+        self.position += self.velocity * HERO_SPEED;
     }
 
     pub fn look_to(&mut self, direction_deg: f32) {

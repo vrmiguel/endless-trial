@@ -18,7 +18,8 @@ pub struct Fireball {
 }
 
 impl Fireball {
-    pub fn out_of_bounds(pos: Vec2<f32>) -> bool {
+    pub fn is_out_of_bounds(&self) -> bool {
+        let pos = self.position;
         pos.x > 800. || pos.y > 800. || pos.x < 0. || pos.y < 0.
     }
 
@@ -28,8 +29,6 @@ impl Fireball {
 }
 
 pub struct FireballManager {
-    // LinkedList would be better here but
-    // linked_list_remove is currently unstable (as of rustc 1.51)
     fireballs: Vec<Fireball>,
     animation: Animation,
     last_thrown_time: Instant,
@@ -71,7 +70,7 @@ impl FireballManager {
 
     pub fn clean_up_oob(&mut self) {
         self.fireballs
-            .retain(|fireball| Fireball::out_of_bounds(fireball.position));
+            .retain(|fireball| !fireball.is_out_of_bounds());
     }
 
     // TODO: rename to update?

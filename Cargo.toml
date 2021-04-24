@@ -7,12 +7,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rand = { version = "0.8.3", feature = "std_rng" }
+rand = "0.8.3"
+soloud = "0.3"
 
 [dependencies.tetra]
 version = "0.6.3"
 default-features = false
-features = ['texture_png', 'texture_jpeg', 'texture_gif', 'texture_bmp']
+features = ['texture_png']
 
 [profile.release]
 lto = true

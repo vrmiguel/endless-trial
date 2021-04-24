@@ -1,4 +1,4 @@
-use tetra::graphics::DrawParams;
+use tetra::graphics::{DrawParams, Rectangle};
 use tetra::graphics::{animation::Animation, Texture};
 use tetra::input::{self, Key};
 use tetra::math::Vec2;
@@ -132,5 +132,25 @@ impl Humanoid {
 
     pub fn get_position(&self) -> Vec2<f32> {
         self.position
+    }
+
+    pub fn set_position(&mut self, new_pos: Vec2<f32>) {
+        self.position = new_pos;
+    }
+
+    pub fn collided_with_bodies(&self, bodies: &[Humanoid]) -> (bool, Vec<Rectangle>) {
+        let player_rect = Rectangle::new(self.position.x, self.position.y, 16.0, 16.0);
+        let body_rects: Vec<_> = bodies
+            .iter()
+            .map(|e| e.get_position())
+            .map(Vec2::into_tuple)
+            .map(|(x, y)| Rectangle::new(x, y, 16.0, 16.0))
+            .collect();
+        for body_rect in &body_rects {
+            if player_rect.intersects(&body_rect) {
+                return (true, body_rects);
+            }
+        }
+        (false, body_rects)
     }
 }

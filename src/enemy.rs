@@ -4,11 +4,11 @@ use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use rand::SeedableRng;
-use tetra::graphics::Texture;
+use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::humanoid::{Humanoid, HumanoidType};
+use crate::{fireball::Fireball, humanoid::{Humanoid, HumanoidType}};
 use crate::sprites::BASIC_GRUNTS;
 
 pub struct EnemyManager {
@@ -68,6 +68,27 @@ impl EnemyManager {
     }
 
 
+    // Currently O(n²) :C
+    pub fn check_for_fireball_collisions(&mut self, enemy_rects: &[Rectangle], fireballs: &[Fireball]) {
+        
+        let fireball_rects: Vec<_> = fireballs
+            .iter()
+            .map(|x| x.get_position())
+            .map(Vec2::into_tuple)
+            .map(|(x, y)| Rectangle::new(x+5.0, y+5.0, 32.0, 32.0))
+            .collect();
+
+        // Enemies that get hit with a fireball will be internally teleported somewhere far away so that our out-of-bounds system removes them  
+        let thrown_away_pos = Vec2::new(5000.0, 5000.0);
+
+        for (enemy, enemy_rect) in self.enemies.iter_mut().zip(enemy_rects) {
+            for fireball in &fireball_rects {
+                if enemy_rect.intersects(fireball) {
+                    enemy.set_position(thrown_away_pos);
+                }
+            }
+        }
+    }
 
     pub fn enemies_ref(&self) -> &[Humanoid] {
         &*self.enemies

@@ -138,9 +138,13 @@ impl State for GameState {
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
         self.check_for_scale_change(ctx);
 
-        if collisionck::player_collided_with_enemy(self.player.get_position(), self.enemy_mgr.enemies_ref()) {
+        let (collided_with_an_enemy, enemy_rects) = self.player.collided_with_bodies(self.enemy_mgr.enemies_ref());
+
+        if collided_with_an_enemy {
             println!("Player collision detected!!");
         }
+    
+        self.enemy_mgr.check_for_fireball_collisions(&enemy_rects, self.fireball_mgr.fireballs_ref());
 
         if self.fireball_mgr.can_throw() {
             match Self::check_for_fire(ctx) {

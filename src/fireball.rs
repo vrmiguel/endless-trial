@@ -1,3 +1,4 @@
+use core::f32;
 use std::{collections::HashMap, time::Duration};
 use std::time::Instant;
 
@@ -19,6 +20,10 @@ pub struct Fireball {
 impl Fireball {
     pub fn out_of_bounds(pos: Vec2<f32>) -> bool {
         pos.x > 800. || pos.y > 800. || pos.x < 0. || pos.y < 0.
+    }
+
+    pub fn get_position(&self) -> Vec2<f32> {
+        self.position
     }
 }
 
@@ -101,6 +106,10 @@ impl FireballManager {
             fireball.position +=
                 Vec2::new(f32::cos(ang_rad), -f32::sin(ang_rad)) * fireball.velocity;
         }
+    }
+
+    pub fn fireballs_ref(&self) -> &[Fireball] {
+        &self.fireballs
     }
 
     pub fn draw(&self, ctx: &mut Context) {

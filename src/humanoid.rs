@@ -89,8 +89,21 @@ impl Humanoid {
         // We assume that 1.0 - 1.0 is always perfectly 0.0
         let x = is_key_pressed_f32(Key::D) - is_key_pressed_f32(Key::A);
         let y = is_key_pressed_f32(Key::S) - is_key_pressed_f32(Key::W);
+        dbg!(x as i32, y as i32);
         // Will be added to self.velocity
         let mut new_velocity = Vec2 { x, y };
+
+        let dir = match (x as i32, y as i32) {
+            (-1, 0) => Direction::West,
+            (0,  1) => Direction::South,
+            (1,  0) => Direction::East,
+            (0, -1) => Direction::North,
+            (1, 1) => Direction::South,
+            (1, -1) => Direction::East,
+            (_, _) => Direction::West
+        };
+
+        self.direction = dir;
 
         // Movement is in diagonal if both x and y contain non-zero values
         let is_diagonal = x != 0.0 && y != 0.0;

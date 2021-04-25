@@ -137,7 +137,7 @@ impl Humanoid {
 
         let new_pos = self.position + new_velocity + self.velocity * HERO_SPEED;
 
-        if !BOUNDS.contains(new_pos) {
+        if BOUNDS.contains(new_pos) {
             self.position = new_pos;
             self.velocity += new_velocity;
         }

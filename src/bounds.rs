@@ -12,6 +12,6 @@ impl Bounds {
     }
 
     pub fn contains(&self, pos: Vec2<f32>) -> bool {
-        pos.x > self.boundaries.width || pos.y > self.boundaries.height || pos.x < 0. || pos.y < 0.
+        pos.x <= self.boundaries.width && pos.y <= self.boundaries.height && pos.x >= 0. && pos.y >= 0.
     }
 }

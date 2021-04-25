@@ -140,7 +140,11 @@ impl Humanoid {
         }
 
         self.velocity += new_velocity;
-        self.position += self.velocity * HERO_SPEED;
+        let new_pos = self.position + self.velocity * HERO_SPEED;
+
+        if !Self::out_of_bounds(new_pos) {
+            self.position = new_pos;
+        }
     }
 
     pub fn look_to(&mut self, direction_deg: f32) {

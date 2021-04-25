@@ -61,11 +61,11 @@ impl EnemyManager {
 
         // rng.gen_range(0.0..10.0)
         let enemy_vel = Vec2::new(
-            rng.gen_range(0.5..1.0) + self.avg_enemy_vel,
-            rng.gen_range(0.5..1.0) + self.avg_enemy_vel,
+            rng.gen_range(0.3..0.7) + self.avg_enemy_vel,
+            rng.gen_range(0.3..0.7) + self.avg_enemy_vel,
         );
 
-        self.avg_enemy_vel += (enemy_vel.x + enemy_vel.y) / 16.0;
+        self.avg_enemy_vel += (enemy_vel.x + enemy_vel.y) / 64.0;
 
         let (x, y) = Self::generate_spawn_location(&mut rng);
 
@@ -84,7 +84,10 @@ impl EnemyManager {
         self.enemies
             .retain(|enemy| !Humanoid::out_of_bounds(enemy.get_position()));
         if self.enemies.len() < enemies_before {
-            println!("[LOG] {} enemies dropped", enemies_before - self.enemies.len());
+            println!(
+                "[LOG] {} enemies dropped",
+                enemies_before - self.enemies.len()
+            );
         }
     }
 

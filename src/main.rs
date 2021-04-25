@@ -4,8 +4,10 @@ mod direction;
 mod enemy;
 mod fireball;
 mod gamestate;
+mod healthbar;
 mod humanoid;
 mod macros;
+mod powerup;
 mod sprites;
 
 use tetra::ContextBuilder;

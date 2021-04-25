@@ -16,7 +16,9 @@ use crate::{
     background::Background,
     enemy::EnemyManager,
     fireball::FireballManager,
+    healthbar::HealthBar,
     humanoid::{Humanoid, HumanoidType},
+    powerup::PowerUpManager,
     sprites, HEIGHT, WIDTH,
 };
 use crate::{down, left, right, up};
@@ -24,8 +26,10 @@ use crate::{down, left, right, up};
 pub struct GameState {
     scaler: ScreenScaler,
     background: Background,
+    health_bar: HealthBar,
     player: Humanoid,
     fireball_mgr: FireballManager,
+    power_up_mgr: PowerUpManager,
     enemy_mgr: EnemyManager,
 }
 
@@ -44,11 +48,13 @@ impl GameState {
         Ok(GameState {
             player,
             background,
+            health_bar: HealthBar::new(ctx),
+            power_up_mgr: PowerUpManager::new(ctx),
             scaler: ScreenScaler::with_window_size(
                 ctx,
                 WIDTH,
                 HEIGHT,
-                ScalingMode::ShowAll,
+                ScalingMode::ShowAllPixelPerfect,
             )?,
             fireball_mgr: FireballManager::new(ctx),
             enemy_mgr: EnemyManager::new(),
@@ -131,6 +137,8 @@ impl State for GameState {
         self.player.draw(ctx);
         self.fireball_mgr.draw(ctx);
         self.enemy_mgr.draw(ctx);
+        self.power_up_mgr.draw(ctx);
+        self.health_bar.draw(ctx, self.player.health());
 
         graphics::reset_canvas(ctx);
         graphics::clear(ctx, Color::BLACK);
@@ -168,10 +176,16 @@ impl State for GameState {
             self.enemy_mgr.spawn_enemy(ctx, HumanoidType::BasicEnemy);
         }
 
+        if self.power_up_mgr.can_spawn() {
+            self.power_up_mgr.spawn_power_up();
+        }
+
         // Checks for WASD presses and updates player location
         self.player.update_from_key_press(ctx);
 
         self.enemy_mgr.update(ctx, self.player.get_position());
+
+        self.power_up_mgr.update();
 
         Ok(())
     }

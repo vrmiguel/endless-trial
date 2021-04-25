@@ -16,7 +16,7 @@ pub enum HumanoidType {
 }
 
 pub struct Humanoid {
-    health_points: u16,
+    hearts: u8,
     direction: Direction,
     animation: HumanoidAnimation,
     position: Vec2<f32>,
@@ -32,7 +32,7 @@ impl Humanoid {
         kind: HumanoidType,
     ) -> Self {
         Self {
-            health_points: 100,
+            hearts: 100,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
             position,
@@ -42,9 +42,11 @@ impl Humanoid {
     }
 
     pub fn out_of_bounds(pos: Vec2<f32>) -> bool {
-        let width = crate::WIDTH as f32;
-        let height = crate::HEIGHT as f32;
-        pos.x > width || pos.y > height || pos.x < 0. || pos.y < 0.
+        pos.x > 800. || pos.y > 800. || pos.x < 0. || pos.y < 0.
+    }
+
+    pub fn health(&self) -> u8 {
+        self.hearts
     }
 
     pub fn advance_animation(&mut self, ctx: &mut Context) {
@@ -89,7 +91,7 @@ impl Humanoid {
         // We assume that 1.0 - 1.0 is always perfectly 0.0
         let x = is_key_pressed_f32(Key::D) - is_key_pressed_f32(Key::A);
         let y = is_key_pressed_f32(Key::S) - is_key_pressed_f32(Key::W);
-        dbg!(x as i32, y as i32);
+        
         // Will be added to self.velocity
         let mut new_velocity = Vec2 { x, y };
 
@@ -158,10 +160,6 @@ impl Humanoid {
         self.position += Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad)) * self.velocity;
 
         self.look_to(theta_rad * RAD_TO_DEG);
-    }
-
-    pub fn set_direction(&mut self, dir: Direction) {
-        self.direction = dir;
     }
 
     pub fn get_position(&self) -> Vec2<f32> {

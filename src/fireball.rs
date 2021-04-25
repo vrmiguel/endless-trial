@@ -1,6 +1,6 @@
 use core::f32;
+use std::time::Duration;
 use std::time::Instant;
-use std::{collections::HashMap, time::Duration};
 
 use tetra::{
     graphics::{animation::Animation, DrawParams, Texture},

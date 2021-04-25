@@ -180,6 +180,8 @@ impl State for GameState {
             self.power_up_mgr.spawn_power_up();
         }
 
+        self.power_up_mgr.check_for_collision(&mut self.player);
+
         // Checks for WASD presses and updates player location
         self.player.update_from_key_press(ctx);
 

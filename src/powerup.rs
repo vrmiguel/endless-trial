@@ -5,13 +5,9 @@ use rand::{
     prelude::{Distribution, StdRng},
     Rng, SeedableRng,
 };
-use tetra::{
-    graphics::{DrawParams, Texture},
-    math::Vec2,
-    Context,
-};
+use tetra::{Context, graphics::{DrawParams, Rectangle, Texture}, math::Vec2};
 
-use crate::sprites;
+use crate::{humanoid::Humanoid, sprites};
 
 pub enum PowerUpKind {
     AdditionalHeart,
@@ -21,6 +17,7 @@ struct PowerUp {
     kind: PowerUpKind,
     spawned_time: Instant,
     position: Vec2<f32>,
+    was_consumed: bool,
 }
 
 impl PowerUp {
@@ -62,6 +59,23 @@ impl PowerUpManager {
         }
     }
 
+    pub fn check_for_collision(&mut self, player: &mut Humanoid) {
+        let player_pos = player.get_position();
+        let player_rect = Rectangle::new(player_pos.x, player_pos.y, 16.0, 16.0);
+        for powerup in &mut self.powerups {
+            let powerup_rect = Rectangle::new(
+                powerup.position.x, 
+                powerup.position.y,
+                // TODO: not sure if 16 is the right width/height here   
+                32.0, 
+                32.0);
+            
+            if powerup_rect.intersects(&player_rect) {
+                powerup.was_consumed = true;
+            }
+        }
+    }
+
     pub fn can_spawn(&self) -> bool {
         let time_since_last_throw = self.last_spawned_time.elapsed();
         time_since_last_throw > Duration::from_secs_f64(5.00)
@@ -81,18 +95,19 @@ impl PowerUpManager {
     }
 
     pub fn update(&mut self) {
-        self.powerups.retain(|powerup| !powerup.is_expired());
+        self.powerups.retain(|p| !p.was_consumed && !p.is_expired());
     }
 
     pub fn spawn_power_up(&mut self) {
         self.last_spawned_time = Instant::now();
         let mut rng = StdRng::from_entropy();
-        let position = Vec2::new(rng.gen_range(0.0..800.0), rng.gen_range(0.0..800.0));
+        let position = Vec2 { x: rng.gen_range(0.0..800.0), y: rng.gen_range(0.0..800.0)};
 
         let power_up = PowerUp {
             kind: rng.gen(),
             spawned_time: self.last_spawned_time,
             position,
+            was_consumed: false,
         };
 
         self.powerups.push(power_up);

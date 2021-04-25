@@ -21,6 +21,8 @@ pub struct Humanoid {
     animation: HumanoidAnimation,
     pub position: Vec2<f32>,
     velocity: Vec2<f32>,
+    // Set when the humanoid should 'flicker', such as when the player is hit
+    pub flickering: u16,
     kind: HumanoidType,
 }
 
@@ -33,10 +35,11 @@ impl Humanoid {
     ) -> Self {
         Self {
             hearts: 2,
+            flickering: 0,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
             position,
-            velocity,
+            velocity,   
             kind,
         }
     }
@@ -68,7 +71,15 @@ impl Humanoid {
         }
     }
 
-    pub fn draw(&self, ctx: &mut Context) {
+    pub fn draw(&mut self, ctx: &mut Context) {
+
+        if self.flickering > 0 {
+            self.flickering -= 1;
+            if self.flickering % 2 == 0 {
+                return;
+            }
+        }
+
         let (animation, scale) = self.get_animation_ref();
 
         animation.draw(

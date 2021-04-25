@@ -157,7 +157,10 @@ impl State for GameState {
             .collided_with_bodies(self.enemy_mgr.enemies_ref());
 
         if collided_with_an_enemy {
-            println!("Player collision detected!!");
+            if self.player.flickering == 0 {
+                self.player.hearts -= 1;
+                self.player.flickering = 30;
+            } 
         }
 
         self.enemy_mgr

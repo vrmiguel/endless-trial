@@ -130,8 +130,8 @@ impl EnemyManager {
         &*self.enemies
     }
 
-    pub fn draw(&self, ctx: &mut Context) {
-        for enemy in &self.enemies {
+    pub fn draw(&mut self, ctx: &mut Context) {
+        for enemy in self.enemies.iter_mut() {
             enemy.draw(ctx);
         }
     }

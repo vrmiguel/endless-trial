@@ -7,9 +7,9 @@ mod gamestate;
 mod healthbar;
 mod humanoid;
 mod macros;
+mod panel;
 mod powerup;
 mod resources;
-mod panel;
 
 use tetra::ContextBuilder;
 

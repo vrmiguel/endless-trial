@@ -12,7 +12,16 @@ use tetra::{
     Context, Event, State,
 };
 
-use crate::{HEIGHT, WIDTH, background::Background, enemy::EnemyManager, fireball::FireballManager, healthbar::HealthBar, humanoid::{Humanoid, HumanoidType}, panel::GameOverPanel, powerup::PowerUpManager, resources};
+use crate::{
+    background::Background,
+    enemy::EnemyManager,
+    fireball::FireballManager,
+    healthbar::HealthBar,
+    humanoid::{Humanoid, HumanoidType},
+    panel::GameOverPanel,
+    powerup::PowerUpManager,
+    resources, HEIGHT, WIDTH,
+};
 use crate::{down, left, right, up};
 
 pub struct GameState {
@@ -44,12 +53,7 @@ impl GameState {
             background,
             health_bar: HealthBar::new(ctx),
             power_up_mgr: PowerUpManager::new(ctx),
-            scaler: ScreenScaler::with_window_size(
-                ctx,
-                WIDTH,
-                HEIGHT,
-                ScalingMode::ShowAll,
-            )?,
+            scaler: ScreenScaler::with_window_size(ctx, WIDTH, HEIGHT, ScalingMode::ShowAll)?,
             fireball_mgr: FireballManager::new(ctx),
             game_over_panel: GameOverPanel::new(ctx),
             enemy_mgr: EnemyManager::new(),
@@ -150,9 +154,8 @@ impl State for GameState {
     }
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
-
         if self.game_is_over {
-            return Ok(())
+            return Ok(());
         }
 
         self.check_for_scale_change(ctx);
@@ -168,7 +171,7 @@ impl State for GameState {
                     self.game_is_over = true;
                 }
                 self.player.flickering = 30;
-            } 
+            }
         }
 
         self.enemy_mgr

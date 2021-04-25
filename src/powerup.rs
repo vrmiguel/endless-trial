@@ -5,7 +5,11 @@ use rand::{
     prelude::{Distribution, StdRng},
     Rng, SeedableRng,
 };
-use tetra::{Context, graphics::{DrawParams, NineSlice, Rectangle, Texture}, math::Vec2};
+use tetra::{
+    graphics::{DrawParams, NineSlice, Rectangle, Texture},
+    math::Vec2,
+    Context,
+};
 
 use crate::{humanoid::Humanoid, resources};
 
@@ -60,12 +64,11 @@ pub struct PowerUpManager {
 
 impl PowerUpManager {
     pub fn new(ctx: &mut Context) -> Self {
-
         let fire_scroll_sprite = Texture::from_file_data(ctx, resources::FIRE_SCROLL)
             .expect("failed to load built-in strawberry sprite");
         let heart_sprite = Texture::from_file_data(ctx, resources::HEART_32X)
             .expect("failed to load built-in heart 32x32 sprite");
-    
+
         Self {
             fire_scroll_sprite,
             heart_sprite,
@@ -78,12 +81,8 @@ impl PowerUpManager {
         let player_pos = player.get_position();
         let player_rect = Rectangle::new(player_pos.x, player_pos.y, 16.0, 16.0);
         for powerup in &mut self.powerups {
-            let powerup_rect = Rectangle::new(
-                powerup.position.x, 
-                powerup.position.y,  
-                32.0, 
-                32.0);
-            
+            let powerup_rect = Rectangle::new(powerup.position.x, powerup.position.y, 32.0, 32.0);
+
             if powerup_rect.intersects(&player_rect) {
                 powerup.was_consumed = true;
                 match powerup.kind {
@@ -100,36 +99,42 @@ impl PowerUpManager {
     }
 
     pub fn draw(&mut self, ctx: &mut Context) {
-        
         for powerup in self.powerups.iter_mut() {
-            if powerup.flickering > 0 {                
-                powerup.flickering -= 1;   
-                println!("Flickering: {}", powerup.flickering);
+            if powerup.flickering > 0 {
+                powerup.flickering -= 1;
                 if powerup.flickering % 2 == 0 {
                     continue;
                 }
-            } 
-            
+            }
+
             match powerup.kind {
                 PowerUpKind::AdditionalHeart => self
                     .heart_sprite
                     .draw(ctx, DrawParams::new().position(powerup.position)),
-                PowerUpKind::FasterShooting => self
-                    .fire_scroll_sprite
-                    .draw(ctx, DrawParams::new().position(powerup.position).scale(Vec2::new(2.5, 2.5))),
+                PowerUpKind::FasterShooting => self.fire_scroll_sprite.draw(
+                    ctx,
+                    DrawParams::new()
+                        .position(powerup.position)
+                        .scale(Vec2::new(2.5, 2.5)),
+                ),
             }
         }
     }
 
     pub fn update(&mut self) {
-        self.powerups.iter_mut().for_each(|p| p.flicker_if_almost_expiring());
+        self.powerups
+            .iter_mut()
+            .for_each(|p| p.flicker_if_almost_expiring());
         self.powerups.retain(|p| !p.was_consumed && !p.is_expired());
     }
 
     pub fn spawn_power_up(&mut self) {
         self.last_spawned_time = Instant::now();
         let mut rng = StdRng::from_entropy();
-        let position = Vec2 { x: rng.gen_range(0.0..800.0), y: rng.gen_range(0.0..800.0)};
+        let position = Vec2 {
+            x: rng.gen_range(0.0..800.0),
+            y: rng.gen_range(0.0..800.0),
+        };
 
         let power_up = PowerUp {
             kind: rng.gen(),

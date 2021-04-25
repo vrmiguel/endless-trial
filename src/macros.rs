@@ -42,5 +42,5 @@ macro_rules! debug_println {
 #[macro_export]
 #[cfg(not(debug_assertions))]
 macro_rules! debug_println {
-    ($($arg:tt)*) => ();
+    ($($arg:tt)*) => {};
 }

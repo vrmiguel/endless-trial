@@ -9,15 +9,19 @@ use tetra::{Context, graphics::{DrawParams, NineSlice, Rectangle, Texture}, math
 
 use crate::{humanoid::Humanoid, resources};
 
+#[derive(Debug)]
 pub enum PowerUpKind {
     AdditionalHeart,
     FasterShooting,
 }
+
+#[derive(Debug)]
 struct PowerUp {
     kind: PowerUpKind,
     spawned_time: Instant,
     position: Vec2<f32>,
     was_consumed: bool,
+    flickering: u8,
 }
 
 impl PowerUp {
@@ -25,6 +29,13 @@ impl PowerUp {
         let elapsed = self.spawned_time.elapsed();
 
         elapsed > Duration::from_secs_f32(10.0)
+    }
+
+    pub fn flicker_if_almost_expiring(&mut self) {
+        let elapsed = self.spawned_time.elapsed();
+        if elapsed > Duration::from_secs_f32(8.0) {
+            self.flickering = 121;
+        }
     }
 }
 
@@ -85,9 +96,17 @@ impl PowerUpManager {
         time_since_last_throw > Duration::from_secs_f64(5.00)
     }
 
-    pub fn draw(&self, ctx: &mut Context) {
+    pub fn draw(&mut self, ctx: &mut Context) {
         
-        for powerup in &self.powerups {
+        for powerup in &mut self.powerups {
+            if powerup.flickering > 0 {                
+                powerup.flickering -= 1;
+                if powerup.flickering % 2 == 0 {
+                    continue;
+                }
+            } else {
+                println!("{:?} not flickering", powerup);
+            }
             match powerup.kind {
                 PowerUpKind::AdditionalHeart => self
                     .heart_sprite
@@ -100,6 +119,7 @@ impl PowerUpManager {
     }
 
     pub fn update(&mut self) {
+        self.powerups.iter_mut().for_each(|p| p.flicker_if_almost_expiring());
         self.powerups.retain(|p| !p.was_consumed && !p.is_expired());
     }
 
@@ -113,6 +133,7 @@ impl PowerUpManager {
             spawned_time: self.last_spawned_time,
             position,
             was_consumed: false,
+            flickering: 0,
         };
 
         self.powerups.push(power_up);

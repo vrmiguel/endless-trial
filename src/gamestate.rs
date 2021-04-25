@@ -181,7 +181,7 @@ impl State for GameState {
             match Self::check_for_fire(ctx) {
                 Some(angle) => self
                     .fireball_mgr
-                    .add_fireball(angle, self.player.get_position()),
+                    .add_fireball(angle, self.player.position),
                 None => {}
             }
         }
@@ -199,7 +199,7 @@ impl State for GameState {
         // Checks for WASD presses and updates player location
         self.player.update_from_key_press(ctx);
 
-        self.enemy_mgr.update(ctx, self.player.get_position());
+        self.enemy_mgr.update(ctx, self.player.position);
 
         self.power_up_mgr.update();
 

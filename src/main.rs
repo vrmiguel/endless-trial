@@ -10,7 +10,9 @@ mod macros;
 mod panel;
 mod powerup;
 mod resources;
+mod bounds;
 
+use bounds::Bounds;
 use tetra::ContextBuilder;
 
 use direction::Direction;
@@ -20,6 +22,7 @@ const WIDTH: i32 = 800;
 const HEIGHT: i32 = 800;
 const DEG_TO_RAD: f32 = 3.14159265358979323846 / 180.0;
 const RAD_TO_DEG: f32 = 180.0 / 3.14159265358979323846;
+const BOUNDS: Bounds = Bounds::new(800.0, 800.0);
 
 const VERSION: &str = "0.1.0";
 

@@ -5,6 +5,7 @@ use tetra::math::Vec2;
 use tetra::Context;
 
 use crate::Direction;
+use crate::BOUNDS;
 use crate::{animation::HumanoidAnimation, RAD_TO_DEG};
 
 pub enum HumanoidType {
@@ -42,10 +43,6 @@ impl Humanoid {
             velocity,
             kind,
         }
-    }
-
-    pub fn out_of_bounds(pos: Vec2<f32>) -> bool {
-        pos.x > 800. || pos.y > 800. || pos.x < 0. || pos.y < 0.
     }
 
     pub fn health(&self) -> u8 {
@@ -140,7 +137,7 @@ impl Humanoid {
 
         let new_pos = self.position + new_velocity + self.velocity * HERO_SPEED;
 
-        if !Self::out_of_bounds(new_pos) {
+        if !BOUNDS.contains(new_pos) {
             self.position = new_pos;
             self.velocity += new_velocity;
         }
@@ -176,15 +173,11 @@ impl Humanoid {
         self.look_to(theta_rad * RAD_TO_DEG);
     }
 
-    pub fn get_position(&self) -> Vec2<f32> {
-        self.position
-    }
-
     pub fn collided_with_bodies(&self, bodies: &[Humanoid]) -> (bool, Vec<Rectangle>) {
         let player_rect = Rectangle::new(self.position.x, self.position.y, 16.0, 16.0);
         let body_rects: Vec<_> = bodies
             .iter()
-            .map(|e| e.get_position())
+            .map(|e| e.position)
             .map(Vec2::into_tuple)
             .map(|(x, y)| Rectangle::new(x, y, 16.0, 16.0))
             .collect();

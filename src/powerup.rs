@@ -6,7 +6,7 @@ use rand::{
     Rng, SeedableRng,
 };
 use tetra::{
-    graphics::{DrawParams, NineSlice, Rectangle, Texture},
+    graphics::{DrawParams, Rectangle, Texture},
     math::Vec2,
     Context,
 };
@@ -78,7 +78,7 @@ impl PowerUpManager {
     }
 
     pub fn check_for_collision(&mut self, player: &mut Humanoid) {
-        let player_pos = player.get_position();
+        let player_pos = player.position;
         let player_rect = Rectangle::new(player_pos.x, player_pos.y, 16.0, 16.0);
         for powerup in &mut self.powerups {
             let powerup_rect = Rectangle::new(powerup.position.x, powerup.position.y, 32.0, 32.0);

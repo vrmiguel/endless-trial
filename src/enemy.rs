@@ -8,7 +8,7 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::resources::BASIC_GRUNTS;
+use crate::{BOUNDS, resources::BASIC_GRUNTS};
 use crate::{
     fireball::Fireball,
     humanoid::{Humanoid, HumanoidType},
@@ -84,7 +84,7 @@ impl EnemyManager {
     pub fn clean_up_oob(&mut self) {
         let enemies_before = self.enemies.len();
         self.enemies
-            .retain(|enemy| !Humanoid::out_of_bounds(enemy.get_position()));
+            .retain(|enemy| BOUNDS.contains(enemy.position));
         if self.enemies.len() < enemies_before {
             debug_println!(
                 "[LOG] {} enemies dropped",

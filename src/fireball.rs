@@ -8,7 +8,7 @@ use tetra::{
     Context,
 };
 
-use crate::{animation::FireballAnimation, resources::FIREBALL, DEG_TO_RAD};
+use crate::{BOUNDS, DEG_TO_RAD, animation::FireballAnimation, resources::FIREBALL};
 
 #[derive(Clone)]
 pub struct Fireball {
@@ -18,11 +18,6 @@ pub struct Fireball {
 }
 
 impl Fireball {
-    pub fn is_out_of_bounds(&self) -> bool {
-        let pos = self.position;
-        pos.x > 800. || pos.y > 800. || pos.x < 0. || pos.y < 0.
-    }
-
     pub fn get_position(&self) -> Vec2<f32> {
         self.position
     }
@@ -69,7 +64,7 @@ impl FireballManager {
 
     pub fn clean_up_oob(&mut self) {
         self.fireballs
-            .retain(|fireball| !fireball.is_out_of_bounds());
+            .retain(|fireball| BOUNDS.contains(fireball.get_position()));
     }
 
     // TODO: rename to update?

@@ -48,7 +48,7 @@ impl GameState {
                 ctx,
                 WIDTH,
                 HEIGHT,
-                ScalingMode::ShowAllPixelPerfect,
+                ScalingMode::ShowAll,
             )?,
             fireball_mgr: FireballManager::new(ctx),
             enemy_mgr: EnemyManager::new(),

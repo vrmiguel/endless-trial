@@ -139,11 +139,11 @@ impl Humanoid {
             self.velocity /= HERO_MOVING_DRAG;
         }
 
-        self.velocity += new_velocity;
-        let new_pos = self.position + self.velocity * HERO_SPEED;
+        let new_pos = self.position + new_velocity + self.velocity * HERO_SPEED;
 
         if !Self::out_of_bounds(new_pos) {
             self.position = new_pos;
+            self.velocity += new_velocity;
         }
     }
 

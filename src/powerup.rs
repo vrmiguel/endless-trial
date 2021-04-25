@@ -32,9 +32,12 @@ impl PowerUp {
     }
 
     pub fn flicker_if_almost_expiring(&mut self) {
+        if self.flickering > 0 {
+            return;
+        }
         let elapsed = self.spawned_time.elapsed();
         if elapsed > Duration::from_secs_f32(8.0) {
-            self.flickering = 121;
+            self.flickering = 120;
         }
     }
 }
@@ -98,15 +101,15 @@ impl PowerUpManager {
 
     pub fn draw(&mut self, ctx: &mut Context) {
         
-        for powerup in &mut self.powerups {
+        for powerup in self.powerups.iter_mut() {
             if powerup.flickering > 0 {                
-                powerup.flickering -= 1;
+                powerup.flickering -= 1;   
+                println!("Flickering: {}", powerup.flickering);
                 if powerup.flickering % 2 == 0 {
                     continue;
                 }
-            } else {
-                println!("{:?} not flickering", powerup);
-            }
+            } 
+            
             match powerup.kind {
                 PowerUpKind::AdditionalHeart => self
                     .heart_sprite

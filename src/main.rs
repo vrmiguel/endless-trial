@@ -8,7 +8,8 @@ mod healthbar;
 mod humanoid;
 mod macros;
 mod powerup;
-mod sprites;
+mod resources;
+mod panel;
 
 use tetra::ContextBuilder;
 

@@ -12,15 +12,7 @@ use tetra::{
     Context, Event, State,
 };
 
-use crate::{
-    background::Background,
-    enemy::EnemyManager,
-    fireball::FireballManager,
-    healthbar::HealthBar,
-    humanoid::{Humanoid, HumanoidType},
-    powerup::PowerUpManager,
-    sprites, HEIGHT, WIDTH,
-};
+use crate::{HEIGHT, WIDTH, background::Background, enemy::EnemyManager, fireball::FireballManager, healthbar::HealthBar, humanoid::{Humanoid, HumanoidType}, panel::GameOverPanel, powerup::PowerUpManager, resources};
 use crate::{down, left, right, up};
 
 pub struct GameState {
@@ -31,11 +23,13 @@ pub struct GameState {
     fireball_mgr: FireballManager,
     power_up_mgr: PowerUpManager,
     enemy_mgr: EnemyManager,
+    game_over_panel: GameOverPanel,
+    game_is_over: bool,
 }
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> tetra::Result<GameState> {
-        let player_texture = Texture::from_file_data(ctx, sprites::HERO)?;
+        let player_texture = Texture::from_file_data(ctx, resources::HERO)?;
 
         let player = Humanoid::new(
             player_texture,
@@ -54,10 +48,12 @@ impl GameState {
                 ctx,
                 WIDTH,
                 HEIGHT,
-                ScalingMode::ShowAllPixelPerfect,
+                ScalingMode::ShowAll,
             )?,
             fireball_mgr: FireballManager::new(ctx),
+            game_over_panel: GameOverPanel::new(ctx),
             enemy_mgr: EnemyManager::new(),
+            game_is_over: false,
         })
     }
 
@@ -140,6 +136,10 @@ impl State for GameState {
         self.power_up_mgr.draw(ctx);
         self.health_bar.draw(ctx, self.player.health());
 
+        if self.game_is_over {
+            self.game_over_panel.draw(ctx);
+        }
+
         graphics::reset_canvas(ctx);
         graphics::clear(ctx, Color::BLACK);
         self.scaler.draw(ctx);
@@ -150,6 +150,11 @@ impl State for GameState {
     }
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
+
+        if self.game_is_over {
+            return Ok(())
+        }
+
         self.check_for_scale_change(ctx);
 
         let (collided_with_an_enemy, enemy_rects) = self
@@ -159,6 +164,9 @@ impl State for GameState {
         if collided_with_an_enemy {
             if self.player.flickering == 0 {
                 self.player.hearts -= 1;
+                if self.player.hearts == 0 {
+                    self.game_is_over = true;
+                }
                 self.player.flickering = 30;
             } 
         }

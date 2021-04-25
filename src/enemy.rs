@@ -8,7 +8,7 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::sprites::BASIC_GRUNTS;
+use crate::resources::BASIC_GRUNTS;
 use crate::{
     fireball::Fireball,
     humanoid::{Humanoid, HumanoidType},

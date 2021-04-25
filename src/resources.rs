@@ -35,3 +35,5 @@ pub const HEART_32X: &[u8] = include_bytes!("../resources/sprites/hearts/heart32
 pub const FIRE_SCROLL: &[u8] = include_bytes!("../resources/sprites/scrolls/fire.png");
 
 pub const PANEL: &[u8] = include_bytes!("../resources/sprites/panel/panel.png");
+
+pub const BITPOTION_FONT: &[u8] = include_bytes!("../resources/fonts/bitpotion.ttf");

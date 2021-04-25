@@ -7,7 +7,7 @@ use rand::{
 };
 use tetra::{Context, graphics::{DrawParams, NineSlice, Rectangle, Texture}, math::Vec2};
 
-use crate::{humanoid::Humanoid, sprites};
+use crate::{humanoid::Humanoid, resources};
 
 pub enum PowerUpKind {
     AdditionalHeart,
@@ -47,9 +47,9 @@ pub struct PowerUpManager {
 impl PowerUpManager {
     pub fn new(ctx: &mut Context) -> Self {
 
-        let fire_scroll_sprite = Texture::from_file_data(ctx, sprites::FIRE_SCROLL)
+        let fire_scroll_sprite = Texture::from_file_data(ctx, resources::FIRE_SCROLL)
             .expect("failed to load built-in strawberry sprite");
-        let heart_sprite = Texture::from_file_data(ctx, sprites::HEART_32X)
+        let heart_sprite = Texture::from_file_data(ctx, resources::HEART_32X)
             .expect("failed to load built-in heart 32x32 sprite");
     
         Self {

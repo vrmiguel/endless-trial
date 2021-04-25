@@ -8,7 +8,7 @@ use tetra::{
     Context,
 };
 
-use crate::{animation::FireballAnimation, sprites::FIREBALL, DEG_TO_RAD};
+use crate::{animation::FireballAnimation, resources::FIREBALL, DEG_TO_RAD};
 
 #[derive(Clone)]
 pub struct Fireball {

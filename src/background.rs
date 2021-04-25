@@ -4,7 +4,7 @@ use tetra::{
     Context,
 };
 
-use crate::sprites;
+use crate::resources;
 
 pub struct Background {
     grass_left: Texture,
@@ -58,18 +58,18 @@ impl Background {
         ];
 
         Self {
-            grass_left: Texture::from_file_data(ctx, sprites::GRASS_LEFT).unwrap(),
-            grass_lower: Texture::from_file_data(ctx, sprites::GRASS_LOWER).unwrap(),
-            grass_lower_left: Texture::from_file_data(ctx, sprites::GRASS_LOWER_LEFT).unwrap(),
-            grass_lower_right: Texture::from_file_data(ctx, sprites::GRASS_LOWER_RIGHT).unwrap(),
-            grass_top_left: Texture::from_file_data(ctx, sprites::GRASS_TOP_LEFT).unwrap(),
-            grass_top: Texture::from_file_data(ctx, sprites::GRASS_TOP).unwrap(),
-            grass_top_right: Texture::from_file_data(ctx, sprites::GRASS_TOP_RIGHT).unwrap(),
-            grass_right: Texture::from_file_data(ctx, sprites::GRASS_RIGHT).unwrap(),
-            grass_1: Texture::from_file_data(ctx, sprites::GRASS_DETAIL_1).unwrap(),
-            grass_2: Texture::from_file_data(ctx, sprites::GRASS_DETAIL_2).unwrap(),
-            rock_1: Texture::from_file_data(ctx, sprites::ROCK1).unwrap(),
-            rock_2: Texture::from_file_data(ctx, sprites::ROCK2).unwrap(),
+            grass_left: Texture::from_file_data(ctx, resources::GRASS_LEFT).unwrap(),
+            grass_lower: Texture::from_file_data(ctx, resources::GRASS_LOWER).unwrap(),
+            grass_lower_left: Texture::from_file_data(ctx, resources::GRASS_LOWER_LEFT).unwrap(),
+            grass_lower_right: Texture::from_file_data(ctx, resources::GRASS_LOWER_RIGHT).unwrap(),
+            grass_top_left: Texture::from_file_data(ctx, resources::GRASS_TOP_LEFT).unwrap(),
+            grass_top: Texture::from_file_data(ctx, resources::GRASS_TOP).unwrap(),
+            grass_top_right: Texture::from_file_data(ctx, resources::GRASS_TOP_RIGHT).unwrap(),
+            grass_right: Texture::from_file_data(ctx, resources::GRASS_RIGHT).unwrap(),
+            grass_1: Texture::from_file_data(ctx, resources::GRASS_DETAIL_1).unwrap(),
+            grass_2: Texture::from_file_data(ctx, resources::GRASS_DETAIL_2).unwrap(),
+            rock_1: Texture::from_file_data(ctx, resources::ROCK1).unwrap(),
+            rock_2: Texture::from_file_data(ctx, resources::ROCK2).unwrap(),
             grass_1_points,
             grass_2_points,
             rock_1_points,

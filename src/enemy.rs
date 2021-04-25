@@ -14,6 +14,8 @@ use crate::{
     humanoid::{Humanoid, HumanoidType},
 };
 
+use crate::debug_println;
+
 pub struct EnemyManager {
     enemies: Vec<Humanoid>,
     last_spawn_time: Instant,
@@ -84,7 +86,7 @@ impl EnemyManager {
         self.enemies
             .retain(|enemy| !Humanoid::out_of_bounds(enemy.get_position()));
         if self.enemies.len() < enemies_before {
-            println!(
+            debug_println!(
                 "[LOG] {} enemies dropped",
                 enemies_before - self.enemies.len()
             );
@@ -118,7 +120,7 @@ impl EnemyManager {
         for (enemy, enemy_rect) in self.enemies.iter_mut().zip(enemy_rects) {
             for fireball in &fireball_rects {
                 if enemy_rect.intersects(fireball) {
-                    enemy.set_position(thrown_away_pos);
+                    enemy.position = thrown_away_pos;
                 }
             }
         }

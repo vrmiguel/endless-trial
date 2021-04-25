@@ -16,10 +16,10 @@ pub enum HumanoidType {
 }
 
 pub struct Humanoid {
-    hearts: u8,
+    pub hearts: u8,
     direction: Direction,
     animation: HumanoidAnimation,
-    position: Vec2<f32>,
+    pub position: Vec2<f32>,
     velocity: Vec2<f32>,
     kind: HumanoidType,
 }
@@ -32,7 +32,7 @@ impl Humanoid {
         kind: HumanoidType,
     ) -> Self {
         Self {
-            hearts: 100,
+            hearts: 2,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
             position,
@@ -164,10 +164,6 @@ impl Humanoid {
 
     pub fn get_position(&self) -> Vec2<f32> {
         self.position
-    }
-
-    pub fn set_position(&mut self, new_pos: Vec2<f32>) {
-        self.position = new_pos;
     }
 
     pub fn collided_with_bodies(&self, bodies: &[Humanoid]) -> (bool, Vec<Rectangle>) {

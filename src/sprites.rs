@@ -33,3 +33,5 @@ pub const BASIC_GRUNTS: &[&[u8]] = &[
 pub const HEART_16X: &[u8] = include_bytes!("../resources/sprites/hearts/heart16.png");
 pub const HEART_32X: &[u8] = include_bytes!("../resources/sprites/hearts/heart32.png");
 pub const FIRE_SCROLL: &[u8] = include_bytes!("../resources/sprites/scrolls/fire.png");
+
+pub const PANEL: &[u8] = include_bytes!("../resources/sprites/panel/panel.png");

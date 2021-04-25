@@ -57,7 +57,6 @@ impl FireballManager {
         let angle_rad = angle * DEG_TO_RAD;
         self.last_thrown_time = Instant::now();
 
-        // We'll start the fireball 5 units away from the player in the given direction
         let position = position + Vec2::new(f32::cos(angle_rad), -f32::sin(angle_rad));
         let fireball = Fireball {
             position,

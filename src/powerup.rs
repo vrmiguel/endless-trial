@@ -5,7 +5,7 @@ use rand::{
     prelude::{Distribution, StdRng},
     Rng, SeedableRng,
 };
-use tetra::{Context, graphics::{DrawParams, Rectangle, Texture}, math::Vec2};
+use tetra::{Context, graphics::{DrawParams, NineSlice, Rectangle, Texture}, math::Vec2};
 
 use crate::{humanoid::Humanoid, sprites};
 
@@ -46,13 +46,14 @@ pub struct PowerUpManager {
 
 impl PowerUpManager {
     pub fn new(ctx: &mut Context) -> Self {
-        let strawberry_sprite = Texture::from_file_data(ctx, sprites::FIRE_SCROLL)
+
+        let fire_scroll_sprite = Texture::from_file_data(ctx, sprites::FIRE_SCROLL)
             .expect("failed to load built-in strawberry sprite");
         let heart_sprite = Texture::from_file_data(ctx, sprites::HEART_32X)
             .expect("failed to load built-in heart 32x32 sprite");
-
+    
         Self {
-            fire_scroll_sprite: strawberry_sprite,
+            fire_scroll_sprite,
             heart_sprite,
             powerups: vec![],
             last_spawned_time: Instant::now(),
@@ -65,13 +66,16 @@ impl PowerUpManager {
         for powerup in &mut self.powerups {
             let powerup_rect = Rectangle::new(
                 powerup.position.x, 
-                powerup.position.y,
-                // TODO: not sure if 16 is the right width/height here   
+                powerup.position.y,  
                 32.0, 
                 32.0);
             
             if powerup_rect.intersects(&player_rect) {
                 powerup.was_consumed = true;
+                match powerup.kind {
+                    PowerUpKind::AdditionalHeart => player.hearts += 1,
+                    PowerUpKind::FasterShooting => {} // TODO
+                }
             }
         }
     }
@@ -82,6 +86,7 @@ impl PowerUpManager {
     }
 
     pub fn draw(&self, ctx: &mut Context) {
+        
         for powerup in &self.powerups {
             match powerup.kind {
                 PowerUpKind::AdditionalHeart => self
@@ -89,7 +94,7 @@ impl PowerUpManager {
                     .draw(ctx, DrawParams::new().position(powerup.position)),
                 PowerUpKind::FasterShooting => self
                     .fire_scroll_sprite
-                    .draw(ctx, DrawParams::new().position(powerup.position).scale(Vec2::new(2.0, 2.0))),
+                    .draw(ctx, DrawParams::new().position(powerup.position).scale(Vec2::new(2.5, 2.5))),
             }
         }
     }

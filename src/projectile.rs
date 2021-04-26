@@ -22,34 +22,32 @@ impl Projectile {
 }
 
 pub struct ProjectileManager {
-    fireballs: Vec<Projectile>,
+    projectiles: Vec<Projectile>,
     animation: Animation,
 }
 
 impl ProjectileManager {
     pub fn new(animation: Animation) -> Self {
         Self {
-            fireballs: vec![],
+            projectiles: vec![],
             animation,
         }
     }
 
-    pub fn add_projectile(&mut self, angle: f32, position: Vec2<f32>) {
+    pub fn add_projectile(&mut self, angle: f32, position: Vec2<f32>, velocity: Vec2<f32>) {
         let angle_rad = angle * DEG_TO_RAD;
-
-        // let position = position + Vec2::new(f32::cos(angle_rad), -f32::sin(angle_rad));
 
         let fireball = Projectile {
             position,
             angle_rad,
-            velocity: Vec2::new(5., 5.),
+            velocity,
         };
 
-        self.fireballs.push(fireball);
+        self.projectiles.push(fireball);
     }
 
     pub fn clean_up_oob(&mut self) {
-        self.fireballs
+        self.projectiles
             .retain(|fireball| BOUNDS.contains(fireball.get_position()));
     }
 
@@ -58,7 +56,7 @@ impl ProjectileManager {
 
         self.clean_up_oob();
 
-        for fireball in &mut self.fireballs {
+        for fireball in &mut self.projectiles {
             let ang_rad = fireball.angle_rad;
             fireball.position +=
                 Vec2::new(f32::cos(ang_rad), -f32::sin(ang_rad)) * fireball.velocity;
@@ -66,11 +64,11 @@ impl ProjectileManager {
     }
 
     pub fn projectiles_ref(&self) -> &[Projectile] {
-        &self.fireballs
+        &self.projectiles
     }
 
     pub fn draw(&self, ctx: &mut Context) {
-        for fireball in &self.fireballs {
+        for fireball in &self.projectiles {
             self.animation.draw(
                 ctx,
                 DrawParams::new()

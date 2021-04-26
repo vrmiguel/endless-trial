@@ -47,6 +47,7 @@ pub struct GameState {
     game_over_panel: GameOverPanel,
     game_is_over: bool,
     rng: StdRng,
+    player_default_shooting_time: Duration,
 }
 
 impl GameState {
@@ -77,6 +78,7 @@ impl GameState {
             one_off_anim_mgr: OneOffAnimationManager::new(ctx),
             game_is_over: false,
             rng: StdRng::from_entropy(),
+            player_default_shooting_time: Duration::from_secs_f32(0.25),
         })
     }
 
@@ -174,15 +176,19 @@ impl State for GameState {
     }
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
+        
+        // Checks if the player changed the screen scaling method  
+        self.check_for_scale_change(ctx);
+
+        // Freeze the game logic if the game is over   
         if self.game_is_over {
             return Ok(());
         }
 
         if self.player.is_dead() {
             self.game_is_over = true;
+            return Ok(());
         }
-
-        self.check_for_scale_change(ctx);
 
         // Check if the player collided with an enemy
         // We return enemy_rects here (Vec of Retangles for each enemy) in order to reuse it in .check_for_fireball_collisions
@@ -205,10 +211,16 @@ impl State for GameState {
         self.enemy_mgr
             .check_for_cannonball_collisions(&mut self.player, &mut self.one_off_anim_mgr);
 
+        if self.power_up_mgr.faster_shooting_active() {
+            self.player.set_shooting_wait_time(Duration::from_secs_f32(0.08))
+        } else {
+            self.player.set_shooting_wait_time(self.player_default_shooting_time);
+        }
+
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {
                 self.fireball_mgr
-                    .add_projectile(angle, self.player.position);
+                    .add_projectile(angle, self.player.position, Vec2 { x: 5.0, y: 5.0 });
                 self.player.register_fire();
             }
         }

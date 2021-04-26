@@ -76,6 +76,7 @@ impl OneOffAnimationManager {
     }
 
     pub fn add_smoke(&mut self, position: Vec2<f32>) {
+        // TODO: add last_smoke_added_time
         let smoke_anim = OneOffAnimation::new(position);
         self.smokes.push(smoke_anim);
     }

@@ -128,7 +128,7 @@ impl EnemyManager {
             if enemy.allowed_to_shoot && enemy.can_fire() {
                 let angle_to_player_deg = enemy.angle_to_pos(player_pos) * RAD_TO_DEG;
                 self.projectile_mgr
-                    .add_projectile(angle_to_player_deg, enemy.position);
+                    .add_projectile(angle_to_player_deg, enemy.position, Vec2 { x: 4.5, y: 4.5 });
                 enemy.register_fire();
             }
 

@@ -62,7 +62,7 @@ impl FireballAnimation {
         Animation::new(
             fireball_texture,
             Rectangle::row(0., 0., 32., 32.).take(5).collect(),
-            Duration::from_secs_f64(0.25),
+            Duration::from_secs_f64(0.10),
         )
     }
 }
@@ -77,7 +77,7 @@ impl CannonballAnimation {
         Animation::new(
             cannonball_texture,
             Rectangle::row(0., 0., 32., 32.).take(5).collect(),
-            Duration::from_secs_f64(0.25),
+            Duration::from_secs_f64(0.10),
         )
     }
 }

@@ -1,4 +1,5 @@
 use std::time::{Duration, Instant};
+use std::collections::HashMap;
 
 use rand::{
     distributions::Standard,
@@ -11,9 +12,9 @@ use tetra::{
     Context,
 };
 
-use crate::{humanoid::Humanoid, resources};
+use crate::{humanoid::Humanoid, panel::Panel, resources};
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Clone, Copy, Eq, PartialEq)]
 pub enum PowerUpKind {
     AdditionalHeart,
     FasterShooting,
@@ -58,8 +59,12 @@ impl Distribution<PowerUpKind> for Standard {
 pub struct PowerUpManager {
     fire_scroll_sprite: Texture,
     heart_sprite: Texture,
+    // The power-ups laying on the ground
     powerups: Vec<PowerUp>,
+    // Timed power-ups consumed   
+    active_powerups: HashMap<PowerUpKind, Instant>,
     last_spawned_time: Instant,
+    panel: Panel,
 }
 
 impl PowerUpManager {
@@ -73,7 +78,9 @@ impl PowerUpManager {
             fire_scroll_sprite,
             heart_sprite,
             powerups: vec![],
+            active_powerups: HashMap::new(),
             last_spawned_time: Instant::now(),
+            panel: Panel::new(ctx)
         }
     }
 
@@ -87,10 +94,16 @@ impl PowerUpManager {
                 powerup.was_consumed = true;
                 match powerup.kind {
                     PowerUpKind::AdditionalHeart => player.hearts += 1,
-                    PowerUpKind::FasterShooting => {} // TODO
+                    p @ PowerUpKind::FasterShooting =>  {
+                        self.active_powerups.insert(p, Instant::now());
+                    }
                 }
             }
         }
+    }
+
+    pub fn faster_shooting_active(&self) -> bool {
+        self.active_powerups.get(&PowerUpKind::FasterShooting).is_some()
     }
 
     pub fn can_spawn(&self) -> bool {
@@ -98,7 +111,38 @@ impl PowerUpManager {
         time_since_last_throw > Duration::from_secs_f64(5.00)
     }
 
+    fn draw_powerup_bar(&self, ctx: &mut Context) {
+
+        let active_powerups_no = self.active_powerups.len();
+        if active_powerups_no == 0 {
+            return;
+        }
+
+        let width = (active_powerups_no as f32) * 16.0 + 10.5;
+
+        self.panel.sprite.draw_nine_slice(
+            ctx, 
+            &self.panel.config, 
+            width, 
+            26.0,
+            DrawParams::new().position(Vec2::new(768.0 - width, 60.0))
+        );
+
+        for (kind, spacing) in self.active_powerups.keys().zip(0..active_powerups_no) {
+            let spacing = spacing as f32;
+            match kind {
+                PowerUpKind::AdditionalHeart => unreachable!(), 
+                PowerUpKind::FasterShooting =>  {
+                    self.fire_scroll_sprite.draw(ctx, DrawParams::new().position(Vec2 { x: 746. - 16.0 * spacing, y: 60. + 4. }))
+                }
+            }
+        }
+    }
+
     pub fn draw(&mut self, ctx: &mut Context) {
+
+        self.draw_powerup_bar(ctx);
+
         for powerup in self.powerups.iter_mut() {
             if powerup.flickering > 0 {
                 powerup.flickering -= 1;
@@ -122,6 +166,8 @@ impl PowerUpManager {
     }
 
     pub fn update(&mut self) {
+        self.active_powerups.retain(|_, instant| instant.elapsed() < Duration::from_secs_f32(5.0));
+
         self.powerups
             .iter_mut()
             .for_each(|p| p.flicker_if_almost_expiring());

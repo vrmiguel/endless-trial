@@ -1,8 +1,10 @@
 use std::time::Duration;
 
-use tetra::graphics::animation::Animation;
 use tetra::graphics::Rectangle;
 use tetra::graphics::Texture;
+use tetra::{graphics::animation::Animation, Context};
+
+use crate::resources::{CANNONBALL, FIREBALL};
 
 /// Animation for the player and grunts
 pub struct HumanoidAnimation {
@@ -54,10 +56,27 @@ impl HumanoidAnimation {
 pub struct FireballAnimation;
 
 impl FireballAnimation {
-    pub fn make_animation(texture: Texture) -> Animation {
+    pub fn make_animation(ctx: &mut Context) -> Animation {
+        let fireball_texture =
+            Texture::from_file_data(ctx, FIREBALL).expect("couldn't read the fireball sprite");
         Animation::new(
-            texture,
-            Rectangle::row(0., 0., 64., 64.).take(5).collect(),
+            fireball_texture,
+            Rectangle::row(0., 0., 32., 32.).take(5).collect(),
+            Duration::from_secs_f64(0.25),
+        )
+    }
+}
+
+pub struct CannonballAnimation;
+
+impl CannonballAnimation {
+    pub fn make_animation(ctx: &mut Context) -> Animation {
+        let cannonball_texture =
+            Texture::from_file_data(ctx, CANNONBALL).expect("couldn't read the cannonball sprite");
+
+        Animation::new(
+            cannonball_texture,
+            Rectangle::row(0., 0., 32., 32.).take(5).collect(),
             Duration::from_secs_f64(0.25),
         )
     }

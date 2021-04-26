@@ -1,14 +1,12 @@
 use core::f32;
-use std::time::Duration;
-use std::time::Instant;
 
 use tetra::{
-    graphics::{animation::Animation, DrawParams, Texture},
+    graphics::{animation::Animation, DrawParams},
     math::Vec2,
     Context,
 };
 
-use crate::{animation::FireballAnimation, resources::FIREBALL, BOUNDS, DEG_TO_RAD};
+use crate::{BOUNDS, DEG_TO_RAD};
 
 #[derive(Clone)]
 pub struct Fireball {
@@ -23,30 +21,24 @@ impl Fireball {
     }
 }
 
-pub struct FireballManager {
+pub struct ProjectileManager {
     fireballs: Vec<Fireball>,
     animation: Animation,
-    last_thrown_time: Instant,
 }
 
-impl FireballManager {
-    pub fn new(ctx: &mut Context) -> Self {
-        let texture =
-            Texture::from_file_data(ctx, FIREBALL).expect("couldn't read the fireball sprite");
-        let animation = FireballAnimation::make_animation(texture);
-
+impl ProjectileManager {
+    pub fn new(animation: Animation) -> Self {
         Self {
             fireballs: vec![],
             animation,
-            last_thrown_time: std::time::Instant::now(),
         }
     }
 
-    pub fn add_fireball(&mut self, angle: f32, position: Vec2<f32>) {
+    pub fn add_projectile(&mut self, angle: f32, position: Vec2<f32>) {
         let angle_rad = angle * DEG_TO_RAD;
-        self.last_thrown_time = Instant::now();
 
         let position = position + Vec2::new(f32::cos(angle_rad), -f32::sin(angle_rad));
+
         let fireball = Fireball {
             position,
             angle_rad,
@@ -84,7 +76,6 @@ impl FireballManager {
                 DrawParams::new()
                     .position(fireball.position)
                     .origin(Vec2::new(16.0, 16.0))
-                    .scale(Vec2::new(0.5, 0.5))
                     .rotation(fireball.angle_rad),
             )
         }

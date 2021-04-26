@@ -22,10 +22,14 @@ pub struct Humanoid {
     pub hearts: u8,
     direction: Direction,
     animation: HumanoidAnimation,
-    pub position: Vec2<f32>, 
+    pub position: Vec2<f32>,
     velocity: Vec2<f32>,
     /// Set when the humanoid should 'flicker', such as when the player is hit
     pub flickering: u16,
+
+    // TODO: these three shooting-related variables should belong to a struct/enum of their own
+    /// Determines if the humanoid can shoot
+    pub allowed_to_shoot: bool,
     /// The last moment that this humanoid shot a projectile   
     last_projectile_thrown_time: Instant,
     /// The interval in which this humanoid can shoot
@@ -38,6 +42,7 @@ impl Humanoid {
         texture: Texture,
         position: Vec2<f32>,
         velocity: Vec2<f32>,
+        allowed_to_shoot: bool,
         shooting_wait_time: Duration,
         kind: HumanoidType,
     ) -> Self {
@@ -46,6 +51,7 @@ impl Humanoid {
             flickering: 0,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
+            allowed_to_shoot,
             last_projectile_thrown_time: Instant::now(),
             shooting_wait_time,
             position,
@@ -60,6 +66,10 @@ impl Humanoid {
         time_since_last_show >= self.shooting_wait_time
     }
 
+    pub fn register_fire(&mut self) {
+        self.last_projectile_thrown_time = Instant::now();
+    }
+
     pub fn advance_animation(&mut self, ctx: &mut Context) {
         match self.direction {
             Direction::North => self.animation.backside.advance(ctx),
@@ -70,11 +80,10 @@ impl Humanoid {
 
     fn get_animation_ref(&self) -> (&Animation, Vec2<f32>) {
         let scale = Vec2::new(3., 3.);
-        let scale_reverse = Vec2::new(-3., 3.);
         match self.direction {
             Direction::North => (&self.animation.backside, scale),
             Direction::West => (&self.animation.leftside, scale),
-            Direction::East => (&self.animation.leftside, scale_reverse),
+            Direction::East => (&self.animation.leftside, Vec2 { x: -3., y: 3. }),
             Direction::South => (&self.animation.frontside, scale),
         }
     }
@@ -172,15 +181,21 @@ impl Humanoid {
         }
     }
 
-    pub fn head_to(&mut self, destination: Vec2<f32>) {
-        let old_pos = self.position;
+    pub fn angle_to_pos(&self, destination: Vec2<f32>) -> f32 {
+        let pos = self.position;
 
-        let delta_x = destination.x - old_pos.x;
-        let delta_y = old_pos.y - destination.y;
-        let theta_rad = f32::atan2(delta_y, delta_x);
+        let delta_x = destination.x - pos.x;
+        let delta_y = pos.y - destination.y;
+        
+        f32::atan2(delta_y, delta_x)
+    }
+
+    pub fn head_to(&mut self, destination: Vec2<f32>) {
+        let theta_rad = self.angle_to_pos(destination);
 
         self.position += Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad)) * self.velocity;
 
+        // Sets the Humanoid's Direction according to the calculated angle
         self.look_to(theta_rad * RAD_TO_DEG);
     }
 

@@ -3,7 +3,6 @@ mod background;
 mod bounds;
 mod direction;
 mod enemy;
-mod projectile;
 mod gamestate;
 mod healthbar;
 mod humanoid;
@@ -11,6 +10,7 @@ mod macros;
 mod oneoffanim;
 mod panel;
 mod powerup;
+mod projectile;
 mod resources;
 
 use bounds::Bounds;

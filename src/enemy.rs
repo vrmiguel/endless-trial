@@ -8,8 +8,16 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::{projectile::Fireball, humanoid::{Humanoid, HumanoidType}, oneoffanim::OneOffAnimationManager};
-use crate::{resources::BASIC_GRUNTS, BOUNDS};
+use crate::{
+    humanoid::{Humanoid, HumanoidType},
+    animation::CannonballAnimation,
+    oneoffanim::OneOffAnimationManager,
+    projectile::{Fireball, ProjectileManager},
+};
+use crate::{
+    resources::{BASIC_GRUNTS, STRONGER_GRUNTS},
+    BOUNDS,
+};
 
 use crate::debug_println;
 
@@ -17,14 +25,19 @@ pub struct EnemyManager {
     enemies: Vec<Humanoid>,
     last_spawn_time: Instant,
     avg_enemy_vel: f32,
+    projectile_mgr: ProjectileManager,
 }
 
 impl EnemyManager {
-    pub fn new() -> Self {
+    pub fn new(ctx: &mut Context) -> Self {
+
+        let cannonball_animation = CannonballAnimation::make_animation(ctx);
+
         Self {
             enemies: vec![],
             last_spawn_time: Instant::now(),
             avg_enemy_vel: 1.0,
+            projectile_mgr: ProjectileManager::new(cannonball_animation),
         }
     }
 
@@ -51,9 +64,19 @@ impl EnemyManager {
             HumanoidType::BasicEnemy => BASIC_GRUNTS
                 .choose(&mut rng)
                 .expect("BASIC_GRUNTS should not be empty"),
-            HumanoidType::StrongerEnemy => todo!(),
+            HumanoidType::StrongerEnemy => STRONGER_GRUNTS
+                .choose(&mut rng)
+                .expect("STRONGER_GRUNTS should not be empty"),
             HumanoidType::BadassEnemy => todo!(),
             HumanoidType::Boss => todo!(),
+        };
+
+        let (allowed_to_shoot, shooting_wait_time) = match kind {
+            HumanoidType::Player => unreachable!(),
+            HumanoidType::BasicEnemy => (false, Duration::from_secs_f32(0.0)),
+            HumanoidType::StrongerEnemy => (true, Duration::from_secs_f32(1.0)),
+            HumanoidType::BadassEnemy => (true, Duration::from_secs_f32(0.5)),
+            HumanoidType::Boss => (true, Duration::from_secs_f32(0.20)),
         };
 
         let texture = Texture::from_file_data(ctx, sprite).expect("failed to load built-in sprite");
@@ -68,7 +91,14 @@ impl EnemyManager {
 
         let (x, y) = Self::generate_spawn_location(&mut rng);
 
-        let enemy = Humanoid::new(texture, Vec2::new(x, y), enemy_vel, Duration::from_secs_f32(1.0), kind);
+        let enemy = Humanoid::new(
+            texture,
+            Vec2::new(x, y),
+            enemy_vel,
+            allowed_to_shoot,
+            shooting_wait_time,
+            kind,
+        );
         self.enemies.push(enemy);
     }
 
@@ -89,11 +119,20 @@ impl EnemyManager {
         }
     }
 
-    pub fn update(&mut self, ctx: &mut Context, heading_to: Vec2<f32>) {
+    pub fn update(&mut self, ctx: &mut Context, player_pos: Vec2<f32>) {
+        // Remove enemies that are out of bounds (i.e., dead enemies)
         self.clean_up_oob();
+
         for enemy in &mut self.enemies {
+            if enemy.allowed_to_shoot && enemy.can_fire() {
+                let angle_to_player = enemy.angle_to_pos(player_pos);
+                self.projectile_mgr.add_projectile(angle_to_player, enemy.position);
+                enemy.register_fire();
+            }
+
+            // Advance the animation of all enemies and update their locations
             enemy.advance_animation(ctx);
-            enemy.head_to(heading_to);
+            enemy.head_to(player_pos);
         }
     }
 
@@ -102,7 +141,7 @@ impl EnemyManager {
         &mut self,
         enemy_rects: &[Rectangle],
         fireballs: &[Fireball],
-        one_off_anim_mgr: &mut OneOffAnimationManager
+        one_off_anim_mgr: &mut OneOffAnimationManager,
     ) {
         let fireball_rects: Vec<_> = fireballs
             .iter()

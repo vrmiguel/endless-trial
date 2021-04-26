@@ -83,8 +83,12 @@ impl OneOffAnimationManager {
         for explosion in &self.explosions {
             self.explosion_anim
                 .set_current_frame_index(explosion.current_frame as usize);
-            self.explosion_anim
-                .draw(ctx, DrawParams::new().position(explosion.position));
+            self.explosion_anim.draw(
+                ctx,
+                DrawParams::new()
+                    .position(explosion.position)
+                    .origin(Vec2::new(16.0, 16.0)),
+            );
         }
     }
 }

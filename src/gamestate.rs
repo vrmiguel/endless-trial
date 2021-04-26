@@ -15,15 +15,17 @@ use tetra::{
 };
 
 use crate::{
+    animation::FireballAnimation,
     background::Background,
     enemy::EnemyManager,
-    projectile::FireballManager,
     healthbar::HealthBar,
     humanoid::{Humanoid, HumanoidType},
     oneoffanim::OneOffAnimationManager,
     panel::GameOverPanel,
     powerup::PowerUpManager,
-    resources, HEIGHT, WIDTH,
+    projectile::ProjectileManager,
+    resources::{self},
+    HEIGHT, WIDTH,
 };
 use crate::{down, left, right, up};
 
@@ -32,7 +34,7 @@ pub struct GameState {
     background: Background,
     health_bar: HealthBar,
     player: Humanoid,
-    fireball_mgr: FireballManager,
+    fireball_mgr: ProjectileManager,
     power_up_mgr: PowerUpManager,
     enemy_mgr: EnemyManager,
     one_off_anim_mgr: OneOffAnimationManager,
@@ -48,10 +50,13 @@ impl GameState {
             player_texture,
             Vec2::new(240.0, 160.0),
             Vec2::new(0.0, 0.0),
+            true,
             Duration::from_secs_f32(0.25),
             HumanoidType::Player,
         );
         let background = Background::new(ctx);
+
+        let fireball_animation = FireballAnimation::make_animation(ctx);
 
         Ok(GameState {
             player,
@@ -59,9 +64,9 @@ impl GameState {
             health_bar: HealthBar::new(ctx),
             power_up_mgr: PowerUpManager::new(ctx),
             scaler: ScreenScaler::with_window_size(ctx, WIDTH, HEIGHT, ScalingMode::ShowAll)?,
-            fireball_mgr: FireballManager::new(ctx),
+            fireball_mgr: ProjectileManager::new(fireball_animation),
             game_over_panel: GameOverPanel::new(ctx),
-            enemy_mgr: EnemyManager::new(),
+            enemy_mgr: EnemyManager::new(ctx),
             one_off_anim_mgr: OneOffAnimationManager::new(ctx),
             game_is_over: false,
         })
@@ -180,17 +185,16 @@ impl State for GameState {
             self.player.flickering = 30;
         }
 
-        self.enemy_mgr
-            .check_for_fireball_collisions(
-                &enemy_rects, 
-                self.fireball_mgr.fireballs_ref(),
-                &mut self.one_off_anim_mgr
-            );
+        self.enemy_mgr.check_for_fireball_collisions(
+            &enemy_rects,
+            self.fireball_mgr.fireballs_ref(),
+            &mut self.one_off_anim_mgr,
+        );
 
         if self.player.can_fire() {
-            match Self::check_for_fire(ctx) {
-                Some(angle) => self.fireball_mgr.add_fireball(angle, self.player.position),
-                None => {}
+            if let Some(angle) = Self::check_for_fire(ctx) {
+                self.fireball_mgr.add_projectile(angle, self.player.position);
+                self.player.register_fire();
             }
         }
 

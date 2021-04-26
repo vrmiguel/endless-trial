@@ -109,7 +109,7 @@ impl Humanoid {
             (0, -1) => Direction::North,
             (1, 1) => Direction::South,
             (1, -1) => Direction::East,
-            (_, _) => Direction::West,
+            (_, _) => self.direction,
         };
 
         self.direction = dir;

@@ -8,12 +8,7 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::{
-    humanoid::{Humanoid, HumanoidType},
-    animation::CannonballAnimation,
-    oneoffanim::OneOffAnimationManager,
-    projectile::{Fireball, ProjectileManager},
-};
+use crate::{RAD_TO_DEG, animation::CannonballAnimation, humanoid::{Humanoid, HumanoidType}, oneoffanim::OneOffAnimationManager, projectile::{Fireball, ProjectileManager}};
 use crate::{
     resources::{BASIC_GRUNTS, STRONGER_GRUNTS},
     BOUNDS,
@@ -123,10 +118,12 @@ impl EnemyManager {
         // Remove enemies that are out of bounds (i.e., dead enemies)
         self.clean_up_oob();
 
+        self.projectile_mgr.advance_animation(ctx);
+
         for enemy in &mut self.enemies {
             if enemy.allowed_to_shoot && enemy.can_fire() {
-                let angle_to_player = enemy.angle_to_pos(player_pos);
-                self.projectile_mgr.add_projectile(angle_to_player, enemy.position);
+                let angle_to_player_deg = enemy.angle_to_pos(player_pos) * RAD_TO_DEG;
+                self.projectile_mgr.add_projectile(angle_to_player_deg, enemy.position);
                 enemy.register_fire();
             }
 
@@ -172,5 +169,6 @@ impl EnemyManager {
         for enemy in self.enemies.iter_mut() {
             enemy.draw(ctx);
         }
+        self.projectile_mgr.draw(ctx);
     }
 }

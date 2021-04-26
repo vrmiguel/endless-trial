@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use graphics::Color;
+use rand::{SeedableRng, prelude::{SliceRandom, StdRng}};
 use tetra::graphics;
 use tetra::time;
 use tetra::window;
@@ -29,6 +30,8 @@ use crate::{
 };
 use crate::{down, left, right, up};
 
+const ENEMY_TYPES: &[HumanoidType] = &[HumanoidType::BasicEnemy, HumanoidType::StrongerEnemy];
+
 pub struct GameState {
     scaler: ScreenScaler,
     background: Background,
@@ -40,6 +43,7 @@ pub struct GameState {
     one_off_anim_mgr: OneOffAnimationManager,
     game_over_panel: GameOverPanel,
     game_is_over: bool,
+    rng: StdRng,
 }
 
 impl GameState {
@@ -69,6 +73,7 @@ impl GameState {
             enemy_mgr: EnemyManager::new(ctx),
             one_off_anim_mgr: OneOffAnimationManager::new(ctx),
             game_is_over: false,
+            rng: StdRng::from_entropy(),
         })
     }
 
@@ -199,7 +204,8 @@ impl State for GameState {
         }
 
         if self.enemy_mgr.can_spawn() {
-            self.enemy_mgr.spawn_enemy(ctx, HumanoidType::BasicEnemy);
+            let kind = *ENEMY_TYPES.choose(&mut self.rng).expect("ENEMY_TYPES shouldn't be empty");
+            self.enemy_mgr.spawn_enemy(ctx, kind);
         }
 
         if self.power_up_mgr.can_spawn() {

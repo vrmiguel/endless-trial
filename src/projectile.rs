@@ -37,7 +37,7 @@ impl ProjectileManager {
     pub fn add_projectile(&mut self, angle: f32, position: Vec2<f32>) {
         let angle_rad = angle * DEG_TO_RAD;
 
-        let position = position + Vec2::new(f32::cos(angle_rad), -f32::sin(angle_rad));
+        // let position = position + Vec2::new(f32::cos(angle_rad), -f32::sin(angle_rad));
 
         let fireball = Fireball {
             position,

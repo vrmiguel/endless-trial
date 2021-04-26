@@ -10,6 +10,7 @@ use crate::Direction;
 use crate::BOUNDS;
 use crate::{animation::HumanoidAnimation, RAD_TO_DEG};
 
+#[derive(Clone, Copy)]
 pub enum HumanoidType {
     Player,
     BasicEnemy,
@@ -187,6 +188,7 @@ impl Humanoid {
         let delta_x = destination.x - pos.x;
         let delta_y = pos.y - destination.y;
         
+        // in radians!
         f32::atan2(delta_y, delta_x)
     }
 

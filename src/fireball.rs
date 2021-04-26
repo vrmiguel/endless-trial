@@ -8,7 +8,7 @@ use tetra::{
     Context,
 };
 
-use crate::{BOUNDS, DEG_TO_RAD, animation::FireballAnimation, resources::FIREBALL};
+use crate::{animation::FireballAnimation, resources::FIREBALL, BOUNDS, DEG_TO_RAD};
 
 #[derive(Clone)]
 pub struct Fireball {
@@ -67,7 +67,6 @@ impl FireballManager {
             .retain(|fireball| BOUNDS.contains(fireball.get_position()));
     }
 
-    // TODO: rename to update?
     pub fn advance_animation(&mut self, ctx: &mut Context) {
         self.animation.advance(ctx);
 

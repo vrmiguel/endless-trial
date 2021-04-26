@@ -8,11 +8,8 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::{BOUNDS, resources::BASIC_GRUNTS};
-use crate::{
-    fireball::Fireball,
-    humanoid::{Humanoid, HumanoidType},
-};
+use crate::{fireball::Fireball, humanoid::{Humanoid, HumanoidType}, oneoffanim::OneOffAnimationManager};
+use crate::{resources::BASIC_GRUNTS, BOUNDS};
 
 use crate::debug_println;
 
@@ -83,8 +80,7 @@ impl EnemyManager {
 
     pub fn clean_up_oob(&mut self) {
         let enemies_before = self.enemies.len();
-        self.enemies
-            .retain(|enemy| BOUNDS.contains(enemy.position));
+        self.enemies.retain(|enemy| BOUNDS.contains(enemy.position));
         if self.enemies.len() < enemies_before {
             debug_println!(
                 "[LOG] {} enemies dropped",
@@ -106,6 +102,7 @@ impl EnemyManager {
         &mut self,
         enemy_rects: &[Rectangle],
         fireballs: &[Fireball],
+        one_off_anim_mgr: &mut OneOffAnimationManager
     ) {
         let fireball_rects: Vec<_> = fireballs
             .iter()
@@ -120,6 +117,7 @@ impl EnemyManager {
         for (enemy, enemy_rect) in self.enemies.iter_mut().zip(enemy_rects) {
             for fireball in &fireball_rects {
                 if enemy_rect.intersects(fireball) {
+                    one_off_anim_mgr.add_explosion(enemy.position - Vec2 { x: 8.0, y: 8.0 });
                     enemy.position = thrown_away_pos;
                 }
             }

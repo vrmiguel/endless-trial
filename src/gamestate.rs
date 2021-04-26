@@ -18,6 +18,7 @@ use crate::{
     fireball::FireballManager,
     healthbar::HealthBar,
     humanoid::{Humanoid, HumanoidType},
+    oneoffanim::OneOffAnimationManager,
     panel::GameOverPanel,
     powerup::PowerUpManager,
     resources, HEIGHT, WIDTH,
@@ -32,6 +33,7 @@ pub struct GameState {
     fireball_mgr: FireballManager,
     power_up_mgr: PowerUpManager,
     enemy_mgr: EnemyManager,
+    one_off_anim_mgr: OneOffAnimationManager,
     game_over_panel: GameOverPanel,
     game_is_over: bool,
 }
@@ -57,6 +59,7 @@ impl GameState {
             fireball_mgr: FireballManager::new(ctx),
             game_over_panel: GameOverPanel::new(ctx),
             enemy_mgr: EnemyManager::new(),
+            one_off_anim_mgr: OneOffAnimationManager::new(ctx),
             game_is_over: false,
         })
     }
@@ -139,6 +142,7 @@ impl State for GameState {
         self.enemy_mgr.draw(ctx);
         self.power_up_mgr.draw(ctx);
         self.health_bar.draw(ctx, self.player.health());
+        self.one_off_anim_mgr.draw(ctx);
 
         if self.game_is_over {
             self.game_over_panel.draw(ctx);
@@ -160,28 +164,29 @@ impl State for GameState {
 
         self.check_for_scale_change(ctx);
 
+        // We return enemy_rects here (Vec of Retangles for each enemy) in order to reuse it in .check_for_fireball_collisions
         let (collided_with_an_enemy, enemy_rects) = self
             .player
             .collided_with_bodies(self.enemy_mgr.enemies_ref());
 
-        if collided_with_an_enemy {
-            if self.player.flickering == 0 {
-                self.player.hearts -= 1;
-                if self.player.hearts == 0 {
-                    self.game_is_over = true;
-                }
-                self.player.flickering = 30;
+        if collided_with_an_enemy && self.player.flickering == 0 {
+            self.player.hearts -= 1;
+            if self.player.hearts == 0 {
+                self.game_is_over = true;
             }
+            self.player.flickering = 30;
         }
 
         self.enemy_mgr
-            .check_for_fireball_collisions(&enemy_rects, self.fireball_mgr.fireballs_ref());
+            .check_for_fireball_collisions(
+                &enemy_rects, 
+                self.fireball_mgr.fireballs_ref(),
+                &mut self.one_off_anim_mgr
+            );
 
         if self.fireball_mgr.can_throw() {
             match Self::check_for_fire(ctx) {
-                Some(angle) => self
-                    .fireball_mgr
-                    .add_fireball(angle, self.player.position),
+                Some(angle) => self.fireball_mgr.add_fireball(angle, self.player.position),
                 None => {}
             }
         }
@@ -198,6 +203,8 @@ impl State for GameState {
 
         // Checks for WASD presses and updates player location
         self.player.update_from_key_press(ctx);
+
+        self.one_off_anim_mgr.update();
 
         self.enemy_mgr.update(ctx, self.player.position);
 

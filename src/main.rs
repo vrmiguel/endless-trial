@@ -1,5 +1,6 @@
 mod animation;
 mod background;
+mod bounds;
 mod direction;
 mod enemy;
 mod fireball;
@@ -7,10 +8,10 @@ mod gamestate;
 mod healthbar;
 mod humanoid;
 mod macros;
+mod oneoffanim;
 mod panel;
 mod powerup;
 mod resources;
-mod bounds;
 
 use bounds::Bounds;
 use tetra::ContextBuilder;

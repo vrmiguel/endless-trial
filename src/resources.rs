@@ -1,5 +1,5 @@
 pub const HERO: &[u8] = include_bytes!("../resources/sprites/hero/hero.png");
-pub const HERO_INVINCIBLE: &[u8] = include_bytes!("../resources/sprites/hero/hero-invincible.png");
+// pub const HERO_INVINCIBLE: &[u8] = include_bytes!("../resources/sprites/hero/hero-invincible.png");
 
 pub const ROCK1: &[u8] = include_bytes!("../resources/sprites/rocks/rock1.png");
 pub const ROCK2: &[u8] = include_bytes!("../resources/sprites/rocks/rock2.png");
@@ -37,3 +37,5 @@ pub const FIRE_SCROLL: &[u8] = include_bytes!("../resources/sprites/scrolls/fire
 pub const PANEL: &[u8] = include_bytes!("../resources/sprites/panel/panel.png");
 
 pub const BITPOTION_FONT: &[u8] = include_bytes!("../resources/fonts/bitpotion.ttf");
+
+pub const EXPLOSION: &[u8] = include_bytes!("../resources/sprites/explosion/explosion.png");

@@ -221,9 +221,15 @@ impl Humanoid {
         (false, body_rects)
     }
 
+    pub fn is_dead(&self) -> bool {
+        self.hearts == 0
+    }
+
     pub fn take_hit(&mut self) {
         if self.flickering == 0 {
-            self.hearts -= 1;
+            if self.hearts > 0 {
+                self.hearts -= 1;
+            }
             self.flickering = 30;
         }
     }

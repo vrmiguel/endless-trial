@@ -46,3 +46,4 @@ pub const PANEL: &[u8] = include_bytes!("../resources/sprites/panel/panel.png");
 pub const BITPOTION_FONT: &[u8] = include_bytes!("../resources/fonts/bitpotion.ttf");
 
 pub const EXPLOSION: &[u8] = include_bytes!("../resources/sprites/explosion/explosion.png");
+pub const SMOKE: &[u8] = include_bytes!("../resources/sprites/explosion/smoke.png");

@@ -178,6 +178,10 @@ impl State for GameState {
             return Ok(());
         }
 
+        if self.player.is_dead() {
+            self.game_is_over = true;
+        }
+
         self.check_for_scale_change(ctx);
 
         // Check if the player collided with an enemy
@@ -188,9 +192,6 @@ impl State for GameState {
 
         if collided_with_an_enemy {
             self.player.take_hit();
-            if self.player.hearts == 0 {
-                self.game_is_over = true;
-            }
         }
 
         // Check if an enemy was hit with a fireball from the player
@@ -202,7 +203,7 @@ impl State for GameState {
 
         // Check if the player was hit with a cannonball from an enemy
         self.enemy_mgr
-            .check_for_cannonball_collisions(&mut self.player);
+            .check_for_cannonball_collisions(&mut self.player, &mut self.one_off_anim_mgr);
 
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {

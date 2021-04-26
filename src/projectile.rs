@@ -9,20 +9,20 @@ use tetra::{
 use crate::{BOUNDS, DEG_TO_RAD};
 
 #[derive(Clone)]
-pub struct Fireball {
+pub struct Projectile {
     position: Vec2<f32>,
     velocity: Vec2<f32>,
     angle_rad: f32,
 }
 
-impl Fireball {
+impl Projectile {
     pub fn get_position(&self) -> Vec2<f32> {
         self.position
     }
 }
 
 pub struct ProjectileManager {
-    fireballs: Vec<Fireball>,
+    fireballs: Vec<Projectile>,
     animation: Animation,
 }
 
@@ -39,7 +39,7 @@ impl ProjectileManager {
 
         // let position = position + Vec2::new(f32::cos(angle_rad), -f32::sin(angle_rad));
 
-        let fireball = Fireball {
+        let fireball = Projectile {
             position,
             angle_rad,
             velocity: Vec2::new(5., 5.),
@@ -65,7 +65,7 @@ impl ProjectileManager {
         }
     }
 
-    pub fn fireballs_ref(&self) -> &[Fireball] {
+    pub fn projectiles_ref(&self) -> &[Projectile] {
         &self.fireballs
     }
 

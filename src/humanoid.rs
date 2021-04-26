@@ -187,9 +187,13 @@ impl Humanoid {
 
         let delta_x = destination.x - pos.x;
         let delta_y = pos.y - destination.y;
-        
+
         // in radians!
         f32::atan2(delta_y, delta_x)
+    }
+
+    pub fn get_rect(&self) -> Rectangle {
+        Rectangle::new(self.position.x, self.position.y, 16.0, 16.0)
     }
 
     pub fn head_to(&mut self, destination: Vec2<f32>) {
@@ -202,7 +206,7 @@ impl Humanoid {
     }
 
     pub fn collided_with_bodies(&self, bodies: &[Humanoid]) -> (bool, Vec<Rectangle>) {
-        let player_rect = Rectangle::new(self.position.x, self.position.y, 16.0, 16.0);
+        let player_rect = self.get_rect();
         let body_rects: Vec<_> = bodies
             .iter()
             .map(|e| e.position)
@@ -215,5 +219,12 @@ impl Humanoid {
             }
         }
         (false, body_rects)
+    }
+
+    pub fn take_hit(&mut self) {
+        if self.flickering == 0 {
+            self.hearts -= 1;
+            self.flickering = 30;
+        }
     }
 }

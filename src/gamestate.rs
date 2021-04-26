@@ -1,7 +1,10 @@
 use std::time::Duration;
 
 use graphics::Color;
-use rand::{SeedableRng, prelude::{SliceRandom, StdRng}};
+use rand::{
+    prelude::{SliceRandom, StdRng},
+    SeedableRng,
+};
 use tetra::graphics;
 use tetra::time;
 use tetra::window;
@@ -177,34 +180,42 @@ impl State for GameState {
 
         self.check_for_scale_change(ctx);
 
+        // Check if the player collided with an enemy
         // We return enemy_rects here (Vec of Retangles for each enemy) in order to reuse it in .check_for_fireball_collisions
         let (collided_with_an_enemy, enemy_rects) = self
             .player
             .collided_with_bodies(self.enemy_mgr.enemies_ref());
 
-        if collided_with_an_enemy && self.player.flickering == 0 {
-            self.player.hearts -= 1;
+        if collided_with_an_enemy {
+            self.player.take_hit();
             if self.player.hearts == 0 {
                 self.game_is_over = true;
             }
-            self.player.flickering = 30;
         }
 
+        // Check if an enemy was hit with a fireball from the player
         self.enemy_mgr.check_for_fireball_collisions(
             &enemy_rects,
-            self.fireball_mgr.fireballs_ref(),
+            self.fireball_mgr.projectiles_ref(),
             &mut self.one_off_anim_mgr,
         );
 
+        // Check if the player was hit with a cannonball from an enemy
+        self.enemy_mgr
+            .check_for_cannonball_collisions(&mut self.player);
+
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {
-                self.fireball_mgr.add_projectile(angle, self.player.position);
+                self.fireball_mgr
+                    .add_projectile(angle, self.player.position);
                 self.player.register_fire();
             }
         }
 
         if self.enemy_mgr.can_spawn() {
-            let kind = *ENEMY_TYPES.choose(&mut self.rng).expect("ENEMY_TYPES shouldn't be empty");
+            let kind = *ENEMY_TYPES
+                .choose(&mut self.rng)
+                .expect("ENEMY_TYPES shouldn't be empty");
             self.enemy_mgr.spawn_enemy(ctx, kind, &mut self.rng);
         }
 

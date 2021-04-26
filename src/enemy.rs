@@ -7,7 +7,7 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::{RAD_TO_DEG, animation::CannonballAnimation, humanoid::{Humanoid, HumanoidType}, oneoffanim::OneOffAnimationManager, projectile::{Fireball, ProjectileManager}};
+use crate::{RAD_TO_DEG, animation::CannonballAnimation, humanoid::{Humanoid, HumanoidType}, oneoffanim::OneOffAnimationManager, projectile::{Projectile, ProjectileManager}};
 use crate::{
     resources::{BASIC_GRUNTS, STRONGER_GRUNTS},
     BOUNDS,
@@ -81,7 +81,7 @@ impl EnemyManager {
             rng.gen_range(0.3..0.7) + self.avg_enemy_vel,
         );
 
-        self.avg_enemy_vel += (enemy_vel.x + enemy_vel.y) / 64.0;
+        self.avg_enemy_vel += (enemy_vel.x + enemy_vel.y) / 256.0;
 
         let (x, y) = Self::generate_spawn_location(rng);
 
@@ -136,7 +136,7 @@ impl EnemyManager {
     pub fn check_for_fireball_collisions(
         &mut self,
         enemy_rects: &[Rectangle],
-        fireballs: &[Fireball],
+        fireballs: &[Projectile],
         one_off_anim_mgr: &mut OneOffAnimationManager,
     ) {
         let fireball_rects: Vec<_> = fireballs
@@ -157,6 +157,17 @@ impl EnemyManager {
                     enemy.position = thrown_away_pos;
                 }
             }
+        }
+    }
+
+    pub fn check_for_cannonball_collisions(&self, player: &mut Humanoid) {
+        let player_rect = player.get_rect();
+        for cannon in self.projectile_mgr.projectiles_ref() {
+            let cannon_pos = cannon.get_position();
+            let cannon_rect = Rectangle::new(cannon_pos.x, cannon_pos.y, 16.0, 16.0);
+            if cannon_rect.intersects(&player_rect) {
+                player.take_hit();
+            }   
         }
     }
 

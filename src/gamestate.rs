@@ -205,7 +205,7 @@ impl State for GameState {
 
         if self.enemy_mgr.can_spawn() {
             let kind = *ENEMY_TYPES.choose(&mut self.rng).expect("ENEMY_TYPES shouldn't be empty");
-            self.enemy_mgr.spawn_enemy(ctx, kind);
+            self.enemy_mgr.spawn_enemy(ctx, kind, &mut self.rng);
         }
 
         if self.power_up_mgr.can_spawn() {

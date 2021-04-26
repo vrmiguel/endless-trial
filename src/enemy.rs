@@ -2,7 +2,6 @@ use std::time::{Duration, Instant};
 
 use rand::seq::SliceRandom;
 use rand::Rng;
-use rand::SeedableRng;
 use rand::{distributions::Uniform, prelude::Distribution, rngs::StdRng};
 use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
@@ -50,17 +49,17 @@ impl EnemyManager {
         }
     }
 
-    pub fn spawn_enemy(&mut self, ctx: &mut Context, kind: HumanoidType) {
-        let mut rng = StdRng::from_entropy();
+    pub fn spawn_enemy(&mut self, ctx: &mut Context, kind: HumanoidType, rng: &mut StdRng) {
+        // let mut rng = StdRng::from_entropy();
 
         self.last_spawn_time = Instant::now();
         let sprite = match kind {
             HumanoidType::Player => panic!("An enemy cannot have the player's sprite"),
             HumanoidType::BasicEnemy => BASIC_GRUNTS
-                .choose(&mut rng)
+                .choose(rng)
                 .expect("BASIC_GRUNTS should not be empty"),
             HumanoidType::StrongerEnemy => STRONGER_GRUNTS
-                .choose(&mut rng)
+                .choose(rng)
                 .expect("STRONGER_GRUNTS should not be empty"),
             HumanoidType::BadassEnemy => todo!(),
             HumanoidType::Boss => todo!(),
@@ -84,7 +83,7 @@ impl EnemyManager {
 
         self.avg_enemy_vel += (enemy_vel.x + enemy_vel.y) / 64.0;
 
-        let (x, y) = Self::generate_spawn_location(&mut rng);
+        let (x, y) = Self::generate_spawn_location(rng);
 
         let enemy = Humanoid::new(
             texture,

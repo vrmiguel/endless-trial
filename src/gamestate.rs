@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use graphics::Color;
 use tetra::graphics;
 use tetra::time;
@@ -15,7 +17,7 @@ use tetra::{
 use crate::{
     background::Background,
     enemy::EnemyManager,
-    fireball::FireballManager,
+    projectile::FireballManager,
     healthbar::HealthBar,
     humanoid::{Humanoid, HumanoidType},
     oneoffanim::OneOffAnimationManager,
@@ -46,6 +48,7 @@ impl GameState {
             player_texture,
             Vec2::new(240.0, 160.0),
             Vec2::new(0.0, 0.0),
+            Duration::from_secs_f32(0.25),
             HumanoidType::Player,
         );
         let background = Background::new(ctx);
@@ -141,7 +144,7 @@ impl State for GameState {
         self.fireball_mgr.draw(ctx);
         self.enemy_mgr.draw(ctx);
         self.power_up_mgr.draw(ctx);
-        self.health_bar.draw(ctx, self.player.health());
+        self.health_bar.draw(ctx, self.player.hearts);
         self.one_off_anim_mgr.draw(ctx);
 
         if self.game_is_over {
@@ -184,7 +187,7 @@ impl State for GameState {
                 &mut self.one_off_anim_mgr
             );
 
-        if self.fireball_mgr.can_throw() {
+        if self.player.can_fire() {
             match Self::check_for_fire(ctx) {
                 Some(angle) => self.fireball_mgr.add_fireball(angle, self.player.position),
                 None => {}

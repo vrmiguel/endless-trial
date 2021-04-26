@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use tetra::graphics::{animation::Animation, Texture};
 use tetra::graphics::{DrawParams, Rectangle};
 use tetra::input::{self, Key};
@@ -20,10 +22,14 @@ pub struct Humanoid {
     pub hearts: u8,
     direction: Direction,
     animation: HumanoidAnimation,
-    pub position: Vec2<f32>,
+    pub position: Vec2<f32>, 
     velocity: Vec2<f32>,
-    // Set when the humanoid should 'flicker', such as when the player is hit
+    /// Set when the humanoid should 'flicker', such as when the player is hit
     pub flickering: u16,
+    /// The last moment that this humanoid shot a projectile   
+    last_projectile_thrown_time: Instant,
+    /// The interval in which this humanoid can shoot
+    shooting_wait_time: Duration,
     kind: HumanoidType,
 }
 
@@ -32,6 +38,7 @@ impl Humanoid {
         texture: Texture,
         position: Vec2<f32>,
         velocity: Vec2<f32>,
+        shooting_wait_time: Duration,
         kind: HumanoidType,
     ) -> Self {
         Self {
@@ -39,14 +46,18 @@ impl Humanoid {
             flickering: 0,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
+            last_projectile_thrown_time: Instant::now(),
+            shooting_wait_time,
             position,
             velocity,
             kind,
         }
     }
 
-    pub fn health(&self) -> u8 {
-        self.hearts
+    pub fn can_fire(&self) -> bool {
+        let time_since_last_show = self.last_projectile_thrown_time.elapsed();
+
+        time_since_last_show >= self.shooting_wait_time
     }
 
     pub fn advance_animation(&mut self, ctx: &mut Context) {

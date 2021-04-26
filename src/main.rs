@@ -3,7 +3,7 @@ mod background;
 mod bounds;
 mod direction;
 mod enemy;
-mod fireball;
+mod projectile;
 mod gamestate;
 mod healthbar;
 mod humanoid;

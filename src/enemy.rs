@@ -8,7 +8,7 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::{fireball::Fireball, humanoid::{Humanoid, HumanoidType}, oneoffanim::OneOffAnimationManager};
+use crate::{projectile::Fireball, humanoid::{Humanoid, HumanoidType}, oneoffanim::OneOffAnimationManager};
 use crate::{resources::BASIC_GRUNTS, BOUNDS};
 
 use crate::debug_println;
@@ -68,7 +68,7 @@ impl EnemyManager {
 
         let (x, y) = Self::generate_spawn_location(&mut rng);
 
-        let enemy = Humanoid::new(texture, Vec2::new(x, y), enemy_vel, kind);
+        let enemy = Humanoid::new(texture, Vec2::new(x, y), enemy_vel, Duration::from_secs_f32(1.0), kind);
         self.enemies.push(enemy);
     }
 
@@ -117,7 +117,8 @@ impl EnemyManager {
         for (enemy, enemy_rect) in self.enemies.iter_mut().zip(enemy_rects) {
             for fireball in &fireball_rects {
                 if enemy_rect.intersects(fireball) {
-                    one_off_anim_mgr.add_explosion(enemy.position - Vec2 { x: 8.0, y: 8.0 });
+                    let (x, y) = (fireball.x + 5.0, fireball.y + 5.0);
+                    one_off_anim_mgr.add_explosion(Vec2 { x, y });
                     enemy.position = thrown_away_pos;
                 }
             }

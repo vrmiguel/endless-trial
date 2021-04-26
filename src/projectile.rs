@@ -42,12 +42,6 @@ impl FireballManager {
         }
     }
 
-    pub fn can_throw(&self) -> bool {
-        let time_since_last_throw = self.last_thrown_time.elapsed();
-
-        time_since_last_throw > Duration::from_secs_f64(0.25)
-    }
-
     pub fn add_fireball(&mut self, angle: f32, position: Vec2<f32>) {
         let angle_rad = angle * DEG_TO_RAD;
         self.last_thrown_time = Instant::now();
@@ -89,6 +83,7 @@ impl FireballManager {
                 ctx,
                 DrawParams::new()
                     .position(fireball.position)
+                    .origin(Vec2::new(16.0, 16.0))
                     .scale(Vec2::new(0.5, 0.5))
                     .rotation(fireball.angle_rad),
             )

@@ -87,8 +87,7 @@ impl OneOffAnimationManager {
         self.explosions
             .retain(|x| x.current_frame != explosion_final_frame);
 
-        self.smokes
-            .retain(|x| x.current_frame != smoke_final_frame);
+        self.smokes.retain(|x| x.current_frame != smoke_final_frame);
     }
 
     pub fn update(&mut self) {

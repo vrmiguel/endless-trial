@@ -33,7 +33,11 @@ use crate::{
 };
 use crate::{down, left, right, up};
 
-const ENEMY_TYPES: &[HumanoidType] = &[HumanoidType::BasicEnemy, HumanoidType::StrongerEnemy];
+const ENEMY_TYPES: &[HumanoidType] = &[
+    HumanoidType::BasicEnemy,
+    HumanoidType::StrongerEnemy,
+    HumanoidType::BadassEnemy,
+];
 
 pub struct GameState {
     scaler: ScreenScaler,
@@ -176,11 +180,10 @@ impl State for GameState {
     }
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
-        
-        // Checks if the player changed the screen scaling method  
+        // Checks if the player changed the screen scaling method
         self.check_for_scale_change(ctx);
 
-        // Freeze the game logic if the game is over   
+        // Freeze the game logic if the game is over
         if self.game_is_over {
             return Ok(());
         }
@@ -212,15 +215,20 @@ impl State for GameState {
             .check_for_cannonball_collisions(&mut self.player, &mut self.one_off_anim_mgr);
 
         if self.power_up_mgr.faster_shooting_active() {
-            self.player.set_shooting_wait_time(Duration::from_secs_f32(0.08))
+            self.player
+                .set_shooting_wait_time(Duration::from_secs_f32(0.08))
         } else {
-            self.player.set_shooting_wait_time(self.player_default_shooting_time);
+            self.player
+                .set_shooting_wait_time(self.player_default_shooting_time);
         }
 
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {
-                self.fireball_mgr
-                    .add_projectile(angle, self.player.position, Vec2 { x: 5.0, y: 5.0 });
+                self.fireball_mgr.add_projectile(
+                    angle,
+                    self.player.position,
+                    Vec2 { x: 5.0, y: 5.0 },
+                );
                 self.player.register_fire();
             }
         }
@@ -238,8 +246,11 @@ impl State for GameState {
 
         self.power_up_mgr.check_for_collision(&mut self.player);
 
+
+        let hero_speed = if self.power_up_mgr.faster_running_active() { 4.5 } else { 2.1 };
+
         // Checks for WASD presses and updates player location
-        self.player.update_from_key_press(ctx);
+        self.player.update_from_key_press(ctx, hero_speed);
 
         self.one_off_anim_mgr.update();
 

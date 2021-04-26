@@ -1,5 +1,5 @@
-use std::time::{Duration, Instant};
 use std::collections::HashMap;
+use std::time::{Duration, Instant};
 
 use rand::{
     distributions::Standard,
@@ -18,6 +18,7 @@ use crate::{humanoid::Humanoid, panel::Panel, resources};
 pub enum PowerUpKind {
     AdditionalHeart,
     FasterShooting,
+    FasterRunning,
 }
 
 #[derive(Debug)]
@@ -49,9 +50,10 @@ impl PowerUp {
 
 impl Distribution<PowerUpKind> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PowerUpKind {
-        match rng.gen_range(0..=1) {
+        match rng.gen_range(0..=2) {
             0 => PowerUpKind::AdditionalHeart,
-            _ => PowerUpKind::FasterShooting,
+            1 => PowerUpKind::FasterShooting,
+            _ => PowerUpKind::FasterRunning,
         }
     }
 }
@@ -59,9 +61,10 @@ impl Distribution<PowerUpKind> for Standard {
 pub struct PowerUpManager {
     fire_scroll_sprite: Texture,
     heart_sprite: Texture,
+    boot_sprite: Texture,
     // The power-ups laying on the ground
     powerups: Vec<PowerUp>,
-    // Timed power-ups consumed   
+    // Timed power-ups consumed
     active_powerups: HashMap<PowerUpKind, Instant>,
     last_spawned_time: Instant,
     panel: Panel,
@@ -73,14 +76,17 @@ impl PowerUpManager {
             .expect("failed to load built-in strawberry sprite");
         let heart_sprite = Texture::from_file_data(ctx, resources::HEART_32X)
             .expect("failed to load built-in heart 32x32 sprite");
+        let boot_sprite = Texture::from_file_data(ctx, resources::BOOT)
+            .expect("failed to load built-in boot sprite");
 
         Self {
             fire_scroll_sprite,
             heart_sprite,
+            boot_sprite,
             powerups: vec![],
             active_powerups: HashMap::new(),
             last_spawned_time: Instant::now(),
-            panel: Panel::new(ctx)
+            panel: Panel::new(ctx),
         }
     }
 
@@ -94,7 +100,7 @@ impl PowerUpManager {
                 powerup.was_consumed = true;
                 match powerup.kind {
                     PowerUpKind::AdditionalHeart => player.hearts += 1,
-                    p @ PowerUpKind::FasterShooting =>  {
+                    p => {
                         self.active_powerups.insert(p, Instant::now());
                     }
                 }
@@ -103,7 +109,15 @@ impl PowerUpManager {
     }
 
     pub fn faster_shooting_active(&self) -> bool {
-        self.active_powerups.get(&PowerUpKind::FasterShooting).is_some()
+        self.active_powerups
+            .get(&PowerUpKind::FasterShooting)
+            .is_some()
+    }
+
+    pub fn faster_running_active(&self) -> bool {
+        self.active_powerups
+            .get(&PowerUpKind::FasterRunning)
+            .is_some()
     }
 
     pub fn can_spawn(&self) -> bool {
@@ -112,7 +126,6 @@ impl PowerUpManager {
     }
 
     fn draw_powerup_bar(&self, ctx: &mut Context) {
-
         let active_powerups_no = self.active_powerups.len();
         if active_powerups_no == 0 {
             return;
@@ -121,26 +134,36 @@ impl PowerUpManager {
         let width = (active_powerups_no as f32) * 16.0 + 10.5;
 
         self.panel.sprite.draw_nine_slice(
-            ctx, 
-            &self.panel.config, 
-            width, 
+            ctx,
+            &self.panel.config,
+            width,
             26.0,
-            DrawParams::new().position(Vec2::new(768.0 - width, 60.0))
+            DrawParams::new().position(Vec2::new(768.0 - width, 60.0)),
         );
 
         for (kind, spacing) in self.active_powerups.keys().zip(0..active_powerups_no) {
             let spacing = spacing as f32;
             match kind {
-                PowerUpKind::AdditionalHeart => unreachable!(), 
-                PowerUpKind::FasterShooting =>  {
-                    self.fire_scroll_sprite.draw(ctx, DrawParams::new().position(Vec2 { x: 746. - 16.0 * spacing, y: 60. + 4. }))
-                }
+                PowerUpKind::AdditionalHeart => unreachable!(),
+                PowerUpKind::FasterShooting => self.fire_scroll_sprite.draw(
+                    ctx,
+                    DrawParams::new().position(Vec2 {
+                        x: 746. - 16.0 * spacing,
+                        y: 60. + 4.,
+                    }),
+                ),
+                PowerUpKind::FasterRunning => self.boot_sprite.draw(
+                    ctx,
+                    DrawParams::new().position(Vec2 {
+                        x: 746. - 16.0 * spacing,
+                        y: 60. + 4.,
+                    }),
+                ),
             }
         }
     }
 
     pub fn draw(&mut self, ctx: &mut Context) {
-
         self.draw_powerup_bar(ctx);
 
         for powerup in self.powerups.iter_mut() {
@@ -161,12 +184,19 @@ impl PowerUpManager {
                         .position(powerup.position)
                         .scale(Vec2::new(2.5, 2.5)),
                 ),
+                PowerUpKind::FasterRunning => self.boot_sprite.draw(
+                    ctx,
+                    DrawParams::new()
+                        .position(powerup.position)
+                        .scale(Vec2::new(2.5, 2.5)),
+                ),
             }
         }
     }
 
     pub fn update(&mut self) {
-        self.active_powerups.retain(|_, instant| instant.elapsed() < Duration::from_secs_f32(5.0));
+        self.active_powerups
+            .retain(|_, instant| instant.elapsed() < Duration::from_secs_f32(5.0));
 
         self.powerups
             .iter_mut()

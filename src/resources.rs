@@ -37,6 +37,12 @@ pub const STRONGER_GRUNTS: &[&[u8]] = &[
     include_bytes!("../resources/sprites/stronger-grunts/stronger-grunt-3.png"),
 ];
 
+pub const BADASS_GRUNTS: &[&[u8]] = &[
+    include_bytes!("../resources/sprites/badass-grunts/badass-grunt1.png"),
+    include_bytes!("../resources/sprites/badass-grunts/badass-grunt2.png"),
+    include_bytes!("../resources/sprites/badass-grunts/badass-grunt3.png"),
+];
+
 pub const HEART_16X: &[u8] = include_bytes!("../resources/sprites/hearts/heart16.png");
 pub const HEART_32X: &[u8] = include_bytes!("../resources/sprites/hearts/heart32.png");
 pub const FIRE_SCROLL: &[u8] = include_bytes!("../resources/sprites/scrolls/fire.png");
@@ -47,3 +53,5 @@ pub const BITPOTION_FONT: &[u8] = include_bytes!("../resources/fonts/bitpotion.t
 
 pub const EXPLOSION: &[u8] = include_bytes!("../resources/sprites/explosion/explosion.png");
 pub const SMOKE: &[u8] = include_bytes!("../resources/sprites/explosion/smoke.png");
+
+pub const BOOT: &[u8] = include_bytes!("../resources/sprites/boot/boot.png");

@@ -112,8 +112,7 @@ impl Humanoid {
         );
     }
 
-    pub fn update_from_key_press(&mut self, ctx: &mut Context) {
-        const HERO_SPEED: f32 = 2.1;
+    pub fn update_from_key_press(&mut self, ctx: &mut Context, hero_speed: f32) {
         // Drag is only applied to the previous frame movement
         const HERO_MOVING_DRAG: f32 = 1.4;
         const HERO_STOPPING_DRAG: f32 = 1.9;
@@ -160,7 +159,7 @@ impl Humanoid {
             self.velocity /= HERO_MOVING_DRAG;
         }
 
-        let new_pos = self.position + new_velocity + self.velocity * HERO_SPEED;
+        let new_pos = self.position + new_velocity + self.velocity * hero_speed;
 
         if BOUNDS.contains(new_pos) {
             self.position = new_pos;

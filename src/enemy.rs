@@ -15,7 +15,7 @@ use crate::{
     RAD_TO_DEG,
 };
 use crate::{
-    resources::{BASIC_GRUNTS, STRONGER_GRUNTS},
+    resources::{BADASS_GRUNTS, BASIC_GRUNTS, STRONGER_GRUNTS},
     BOUNDS,
 };
 
@@ -66,7 +66,9 @@ impl EnemyManager {
             HumanoidType::StrongerEnemy => STRONGER_GRUNTS
                 .choose(rng)
                 .expect("STRONGER_GRUNTS should not be empty"),
-            HumanoidType::BadassEnemy => todo!(),
+            HumanoidType::BadassEnemy => BADASS_GRUNTS
+                .choose(rng)
+                .expect("BADASS_GRUNTS should not be empty"),
             HumanoidType::Boss => todo!(),
         };
 
@@ -74,8 +76,8 @@ impl EnemyManager {
             HumanoidType::Player => unreachable!(),
             HumanoidType::BasicEnemy => (false, Duration::from_secs_f32(0.0)),
             HumanoidType::StrongerEnemy => (true, Duration::from_secs_f32(1.0)),
-            HumanoidType::BadassEnemy => (true, Duration::from_secs_f32(0.5)),
-            HumanoidType::Boss => (true, Duration::from_secs_f32(0.20)),
+            HumanoidType::BadassEnemy => (true, Duration::from_secs_f32(0.25)),
+            HumanoidType::Boss => (true, Duration::from_secs_f32(0.10)),
         };
 
         let texture = Texture::from_file_data(ctx, sprite).expect("failed to load built-in sprite");
@@ -127,8 +129,11 @@ impl EnemyManager {
         for enemy in &mut self.enemies {
             if enemy.allowed_to_shoot && enemy.can_fire() {
                 let angle_to_player_deg = enemy.angle_to_pos(player_pos) * RAD_TO_DEG;
-                self.projectile_mgr
-                    .add_projectile(angle_to_player_deg, enemy.position, Vec2 { x: 4.5, y: 4.5 });
+                self.projectile_mgr.add_projectile(
+                    angle_to_player_deg,
+                    enemy.position,
+                    Vec2 { x: 4.5, y: 4.5 },
+                );
                 enemy.register_fire();
             }
 

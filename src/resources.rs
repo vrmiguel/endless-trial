@@ -43,6 +43,8 @@ pub const BADASS_GRUNTS: &[&[u8]] = &[
     include_bytes!("../resources/sprites/badass-grunts/badass-grunt3.png"),
 ];
 
+pub const BOSS: &[u8] = include_bytes!("../resources/sprites/boss/boss.png");
+
 pub const HEART_16X: &[u8] = include_bytes!("../resources/sprites/hearts/heart16.png");
 pub const HEART_32X: &[u8] = include_bytes!("../resources/sprites/hearts/heart32.png");
 pub const FIRE_SCROLL: &[u8] = include_bytes!("../resources/sprites/scrolls/fire.png");

@@ -7,16 +7,13 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
+use crate::resources::{BADASS_GRUNTS, BASIC_GRUNTS, STRONGER_GRUNTS, BOSS};
 use crate::{
     animation::CannonballAnimation,
     humanoid::{Humanoid, HumanoidType},
     oneoffanim::OneOffAnimationManager,
     projectile::{Projectile, ProjectileManager},
     RAD_TO_DEG,
-};
-use crate::{
-    resources::{BADASS_GRUNTS, BASIC_GRUNTS, STRONGER_GRUNTS},
-    BOUNDS,
 };
 
 use crate::debug_println;
@@ -67,8 +64,6 @@ impl EnemyManager {
     }
 
     pub fn spawn_enemy(&mut self, ctx: &mut Context, kind: HumanoidType, rng: &mut StdRng) {
-        // let mut rng = StdRng::from_entropy();
-
         self.last_spawn_time = Instant::now();
         let sprite = match kind {
             HumanoidType::Player => panic!("An enemy cannot have the player's sprite"),
@@ -81,7 +76,7 @@ impl EnemyManager {
             HumanoidType::BadassEnemy => BADASS_GRUNTS
                 .choose(rng)
                 .expect("BADASS_GRUNTS should not be empty"),
-            HumanoidType::Boss => todo!(),
+            HumanoidType::Boss => &BOSS,
         };
 
         let (lives, allowed_to_shoot, shooting_wait_time) = match kind {
@@ -121,10 +116,9 @@ impl EnemyManager {
         time_since_last_spawn > Duration::from_secs_f64(1.5)
     }
 
-    pub fn clean_up_oob(&mut self) {
+    pub fn clean_up_dead_enemies(&mut self) {
         let enemies_before = self.enemies.len();
-        self.enemies
-            .retain(|enemy| !enemy.is_dead() && BOUNDS.contains(enemy.position));
+        self.enemies.retain(|enemy| !enemy.is_dead());
         if self.enemies.len() < enemies_before {
             debug_println!(
                 "[LOG] {} enemies dropped",
@@ -134,8 +128,7 @@ impl EnemyManager {
     }
 
     pub fn update(&mut self, ctx: &mut Context, player_pos: Vec2<f32>) {
-        // Remove enemies that are out of bounds (i.e., dead enemies)
-        self.clean_up_oob();
+        self.clean_up_dead_enemies();
 
         self.projectile_mgr.advance_animation(ctx);
 

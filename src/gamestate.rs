@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use graphics::Color;
 use rand::{
@@ -33,10 +33,43 @@ use crate::{
 };
 use crate::{down, left, right, up};
 
-const ENEMY_TYPES: &[HumanoidType] = &[
-    HumanoidType::BasicEnemy,
-    HumanoidType::StrongerEnemy,
-    HumanoidType::BadassEnemy,
+const WAVES: [[(HumanoidType, f32); 4]; 6] = [
+    [
+        (HumanoidType::BasicEnemy, 0.85),
+        (HumanoidType::StrongerEnemy, 0.10),
+        (HumanoidType::BadassEnemy, 0.05),
+        (HumanoidType::Boss, 0.0),
+    ],
+    [
+        (HumanoidType::BasicEnemy, 0.75),
+        (HumanoidType::StrongerEnemy, 0.20),
+        (HumanoidType::BadassEnemy, 0.05),
+        (HumanoidType::Boss, 0.0),
+    ],
+    [
+        (HumanoidType::BasicEnemy, 0.75),
+        (HumanoidType::StrongerEnemy, 0.20),
+        (HumanoidType::BadassEnemy, 0.05),
+        (HumanoidType::Boss, 0.0),
+    ],
+    [
+        (HumanoidType::BasicEnemy, 0.4),
+        (HumanoidType::StrongerEnemy, 0.5),
+        (HumanoidType::BadassEnemy, 0.1),
+        (HumanoidType::Boss, 0.0),
+    ],
+    [
+        (HumanoidType::BasicEnemy, 0.1),
+        (HumanoidType::StrongerEnemy, 0.6),
+        (HumanoidType::BadassEnemy, 0.3),
+        (HumanoidType::Boss, 0.0),
+    ],
+    [
+        (HumanoidType::BasicEnemy, 0.0),
+        (HumanoidType::StrongerEnemy, 0.55),
+        (HumanoidType::BadassEnemy, 0.35),
+        (HumanoidType::Boss, 0.1),
+    ],
 ];
 
 pub struct GameState {
@@ -53,6 +86,8 @@ pub struct GameState {
     rng: StdRng,
     player_default_shooting_time: Duration,
     game_score: u64,
+    current_wave: u8,
+    start_of_this_wave: Instant,
 }
 
 impl GameState {
@@ -86,7 +121,19 @@ impl GameState {
             rng: StdRng::from_entropy(),
             player_default_shooting_time: Duration::from_secs_f32(0.25),
             game_score: 0,
+            current_wave: 0,
+            start_of_this_wave: Instant::now(),
         })
+    }
+
+    fn check_for_wave_change(&mut self) {
+        let elapsed = self.start_of_this_wave.elapsed();
+
+        if elapsed > Duration::from_secs(30) && self.current_wave < (WAVES.len() as u8 - 1) {
+            self.current_wave += 1;
+            self.start_of_this_wave = Instant::now();
+            println!("Commencing wave {}", self.current_wave + 1);
+        }
     }
 
     fn check_for_scale_change(&mut self, ctx: &mut Context) {
@@ -107,9 +154,18 @@ impl GameState {
     }
 
     fn triple_shoot(&mut self, angle: f32) {
-        self.fireball_mgr.add_projectile(angle - 45.0, self.player.position, Vec2 { x: 6.0, y: 6.0 });
-        self.fireball_mgr.add_projectile(angle, self.player.position, Vec2 { x: 6.0, y: 6.0 });
-        self.fireball_mgr.add_projectile(angle + 45.0, self.player.position, Vec2 { x: 6.0, y: 6.0 });
+        self.fireball_mgr.add_projectile(
+            angle - 45.0,
+            self.player.position,
+            Vec2 { x: 6.0, y: 6.0 },
+        );
+        self.fireball_mgr
+            .add_projectile(angle, self.player.position, Vec2 { x: 6.0, y: 6.0 });
+        self.fireball_mgr.add_projectile(
+            angle + 45.0,
+            self.player.position,
+            Vec2 { x: 6.0, y: 6.0 },
+        );
     }
 
     // TODO: there's probably a nicer solution to this with algebra
@@ -186,8 +242,9 @@ impl State for GameState {
         window::set_title(
             ctx,
             &format!(
-                "joguinho - {:.0} FPS - Score: {}",
+                "joguinho - {:.0} FPS - Wave: {} - Score: {}",
                 time::get_fps(ctx),
+                self.current_wave + 1,
                 self.game_score
             ),
         );
@@ -208,6 +265,9 @@ impl State for GameState {
             self.game_is_over = true;
             return Ok(());
         }
+
+        // Checks if the current wave is over
+        self.check_for_wave_change();
 
         // Check if the player collided with an enemy
         // We return enemy_rects here (Vec of Retangles for each enemy) in order to reuse it in .check_for_fireball_collisions
@@ -240,23 +300,23 @@ impl State for GameState {
 
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {
-                if self.power_up_mgr.triple_shooting_active() {
-                    self.triple_shoot(angle);
-                } else {
-                    self.fireball_mgr.add_projectile(
+                match self.power_up_mgr.triple_shooting_active() {
+                    true => self.triple_shoot(angle),
+                    false => self.fireball_mgr.add_projectile(
                         angle,
                         self.player.position,
                         Vec2 { x: 5.0, y: 5.0 },
-                    );
+                    ),
                 }
                 self.player.register_fire();
             }
         }
 
         if self.enemy_mgr.can_spawn() {
-            let kind = *ENEMY_TYPES
-                .choose(&mut self.rng)
-                .expect("ENEMY_TYPES shouldn't be empty");
+            let kind = WAVES[self.current_wave as usize]
+                .choose_weighted(&mut self.rng, |x| x.1)
+                .expect("WAVES should not be empty")
+                .0;
             self.enemy_mgr.spawn_enemy(ctx, kind, &mut self.rng);
         }
 

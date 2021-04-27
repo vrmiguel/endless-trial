@@ -91,17 +91,16 @@ impl EnemyManager {
             HumanoidType::Boss => todo!(),
         };
 
-        let (allowed_to_shoot, shooting_wait_time) = match kind {
+        let (lives, allowed_to_shoot, shooting_wait_time) = match kind {
             HumanoidType::Player => unreachable!(),
-            HumanoidType::BasicEnemy => (false, Duration::from_secs_f32(0.0)),
-            HumanoidType::StrongerEnemy => (true, Duration::from_secs_f32(1.0)),
-            HumanoidType::BadassEnemy => (true, Duration::from_secs_f32(0.25)),
-            HumanoidType::Boss => (true, Duration::from_secs_f32(0.10)),
+            HumanoidType::BasicEnemy => (1, false, Duration::from_secs_f32(0.0)),
+            HumanoidType::StrongerEnemy => (2, true, Duration::from_secs_f32(1.0)),
+            HumanoidType::BadassEnemy => (3, true, Duration::from_secs_f32(0.25)),
+            HumanoidType::Boss => (10, true, Duration::from_secs_f32(0.10)),
         };
 
         let texture = Texture::from_file_data(ctx, sprite).expect("failed to load built-in sprite");
 
-        // rng.gen_range(0.0..10.0)
         let enemy_vel = Vec2::new(
             rng.gen_range(0.3..0.7) + self.avg_enemy_vel,
             rng.gen_range(0.3..0.7) + self.avg_enemy_vel,
@@ -112,6 +111,7 @@ impl EnemyManager {
         let (x, y) = Self::generate_spawn_location(rng);
 
         let enemy = Humanoid::new(
+            lives,
             texture,
             Vec2::new(x, y),
             enemy_vel,
@@ -130,7 +130,7 @@ impl EnemyManager {
 
     pub fn clean_up_oob(&mut self) {
         let enemies_before = self.enemies.len();
-        self.enemies.retain(|enemy| BOUNDS.contains(enemy.position));
+        self.enemies.retain(|enemy| !enemy.is_dead() &&  BOUNDS.contains(enemy.position));
         if self.enemies.len() < enemies_before {
             debug_println!(
                 "[LOG] {} enemies dropped",
@@ -184,7 +184,8 @@ impl EnemyManager {
                 if enemy_rect.intersects(fireball) {
                     let (x, y) = (fireball.x + 5.0, fireball.y + 5.0);
                     one_off_anim_mgr.add_explosion(Vec2 { x, y });
-                    enemy.position = thrown_away_pos;
+                    // enemy.position = thrown_away_pos;
+                    enemy.take_hit();
                 }
             }
         }

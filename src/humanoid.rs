@@ -40,6 +40,7 @@ pub struct Humanoid {
 
 impl Humanoid {
     pub fn new(
+        hearts: u8,
         texture: Texture,
         position: Vec2<f32>,
         velocity: Vec2<f32>,
@@ -48,7 +49,7 @@ impl Humanoid {
         kind: HumanoidType,
     ) -> Self {
         Self {
-            hearts: 2,
+            hearts,
             flickering: 0,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),

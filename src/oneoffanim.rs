@@ -27,6 +27,8 @@ impl OneOffAnimation {
 
 pub struct OneOffAnimationManager {
     last_updated_time: Instant,
+    last_smoke_added_time: Instant,
+    last_explosion_added_time: Instant,
     explosion_anim: Animation,
     explosion_anim_frames: u8,
     smoke_anim: Animation,
@@ -61,6 +63,8 @@ impl OneOffAnimationManager {
 
         Self {
             last_updated_time: Instant::now(),
+            last_explosion_added_time: Instant::now(),
+            last_smoke_added_time: Instant::now(),
             explosion_anim,
             explosion_anim_frames,
             smoke_anim,
@@ -71,12 +75,31 @@ impl OneOffAnimationManager {
     }
 
     pub fn add_explosion(&mut self, position: Vec2<f32>) {
+        if !self.can_add_explosion() {
+            return;
+        }
+        self.last_explosion_added_time = Instant::now();
         let explosion_anim = OneOffAnimation::new(position);
         self.explosions.push(explosion_anim);
     }
 
+    fn can_add_smoke(&self) -> bool {
+        let elapsed = self.last_smoke_added_time.elapsed();
+
+        elapsed > Duration::from_secs_f32(0.2)
+    }
+
+    fn can_add_explosion(&self) -> bool {
+        let elapsed = self.last_explosion_added_time.elapsed();
+
+        elapsed > Duration::from_secs_f32(0.2)
+    }
+
     pub fn add_smoke(&mut self, position: Vec2<f32>) {
-        // TODO: add last_smoke_added_time
+        if !self.can_add_smoke() {
+            return;
+        }
+        self.last_smoke_added_time = Instant::now();
         let smoke_anim = OneOffAnimation::new(position);
         self.smokes.push(smoke_anim);
     }

@@ -60,6 +60,7 @@ impl GameState {
         let player_texture = Texture::from_file_data(ctx, resources::HERO)?;
 
         let player = Humanoid::new(
+            2,
             player_texture,
             Vec2::new(240.0, 160.0),
             Vec2::new(0.0, 0.0),

@@ -54,6 +54,25 @@ impl EnemyManager {
         }
     }
 
+    pub fn calc_score(&self) -> u64 {
+        let enemy_score = |kind| {
+            match kind {
+                HumanoidType::BasicEnemy => 100,
+                HumanoidType::StrongerEnemy => 250,
+                HumanoidType::BadassEnemy => 500,
+                HumanoidType::Boss => 1250,
+                HumanoidType::Player => unreachable!()
+            }
+        };
+
+        self
+            .enemies
+            .iter()
+            .map(|e| e.kind())
+            .map(enemy_score)
+            .sum()
+    }
+
     pub fn spawn_enemy(&mut self, ctx: &mut Context, kind: HumanoidType, rng: &mut StdRng) {
         // let mut rng = StdRng::from_entropy();
 

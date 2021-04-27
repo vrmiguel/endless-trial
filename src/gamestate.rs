@@ -52,6 +52,7 @@ pub struct GameState {
     game_is_over: bool,
     rng: StdRng,
     player_default_shooting_time: Duration,
+    game_score: u64,
 }
 
 impl GameState {
@@ -83,6 +84,7 @@ impl GameState {
             game_is_over: false,
             rng: StdRng::from_entropy(),
             player_default_shooting_time: Duration::from_secs_f32(0.25),
+            game_score: 0,
         })
     }
 
@@ -174,7 +176,7 @@ impl State for GameState {
         graphics::clear(ctx, Color::BLACK);
         self.scaler.draw(ctx);
 
-        window::set_title(ctx, &format!("joguinho - {:.0} FPS", time::get_fps(ctx)));
+        window::set_title(ctx, &format!("joguinho - {:.0} FPS - Score: {}", time::get_fps(ctx), self.game_score));
 
         Ok(())
     }
@@ -240,6 +242,8 @@ impl State for GameState {
             self.enemy_mgr.spawn_enemy(ctx, kind, &mut self.rng);
         }
 
+        let enemy_score = self.enemy_mgr.calc_score();
+
         if self.power_up_mgr.can_spawn() {
             self.power_up_mgr.spawn_power_up();
         }
@@ -257,6 +261,8 @@ impl State for GameState {
         self.enemy_mgr.update(ctx, self.player.position);
 
         self.power_up_mgr.update();
+
+        self.game_score += enemy_score - self.enemy_mgr.calc_score();
 
         Ok(())
     }

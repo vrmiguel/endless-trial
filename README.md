@@ -14,5 +14,6 @@ This project uses several free sprites:
   * [BitPotion](https:/https://joebrogers.itch.io/bitpotion) font by Joeb Rogers
   * [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by pixel-boy 
   * [Fire Spell Effect 02](https://pimen.itch.io/fire-spell-effect-02) by pimen
+  * [16x16 RPG Item Pack](https://alexs-assets.itch.io/16x16-rpg-item-pack) by Alex's Assets
 
 Characters were made with 0x72's [2-bit Character Generator](https://0x72.itch.io/2bitcharactergenerator)

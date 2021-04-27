@@ -65,6 +65,10 @@ impl Humanoid {
         self.shooting_wait_time = duration;
     }
 
+    pub fn kind(&self) -> HumanoidType {
+        self.kind
+    }
+
     pub fn can_fire(&self) -> bool {
         let time_since_last_show = self.last_projectile_thrown_time.elapsed();
 

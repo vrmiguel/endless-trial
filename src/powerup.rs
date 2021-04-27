@@ -19,6 +19,7 @@ pub enum PowerUpKind {
     AdditionalHeart,
     FasterShooting,
     FasterRunning,
+    TripleShooting,
 }
 
 #[derive(Debug)]
@@ -50,9 +51,10 @@ impl PowerUp {
 
 impl Distribution<PowerUpKind> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> PowerUpKind {
-        match rng.gen_range(0..=2) {
+        match rng.gen_range(0..=3) {
             0 => PowerUpKind::AdditionalHeart,
             1 => PowerUpKind::FasterShooting,
+            2 => PowerUpKind::TripleShooting,
             _ => PowerUpKind::FasterRunning,
         }
     }
@@ -62,6 +64,7 @@ pub struct PowerUpManager {
     fire_scroll_sprite: Texture,
     heart_sprite: Texture,
     boot_sprite: Texture,
+    ring_sprite: Texture,
     // The power-ups laying on the ground
     powerups: Vec<PowerUp>,
     // Timed power-ups consumed
@@ -78,11 +81,14 @@ impl PowerUpManager {
             .expect("failed to load built-in heart 32x32 sprite");
         let boot_sprite = Texture::from_file_data(ctx, resources::BOOT)
             .expect("failed to load built-in boot sprite");
+        let ring_sprite = Texture::from_file_data(ctx, resources::RING)
+            .expect("failed to load built-in ring sprite");
 
         Self {
             fire_scroll_sprite,
             heart_sprite,
             boot_sprite,
+            ring_sprite,
             powerups: vec![],
             active_powerups: HashMap::new(),
             last_spawned_time: Instant::now(),
@@ -117,6 +123,12 @@ impl PowerUpManager {
     pub fn faster_running_active(&self) -> bool {
         self.active_powerups
             .get(&PowerUpKind::FasterRunning)
+            .is_some()
+    }
+
+    pub fn triple_shooting_active(&self) -> bool {
+        self.active_powerups
+            .get(&PowerUpKind::TripleShooting)
             .is_some()
     }
 
@@ -159,6 +171,13 @@ impl PowerUpManager {
                         y: 60. + 4.,
                     }),
                 ),
+                PowerUpKind::TripleShooting => self.ring_sprite.draw(
+                    ctx,
+                    DrawParams::new().position(Vec2 {
+                        x: 746. - 16.0 * spacing,
+                        y: 60. + 4.,
+                    }),
+                ),
             }
         }
     }
@@ -185,6 +204,12 @@ impl PowerUpManager {
                         .scale(Vec2::new(2.5, 2.5)),
                 ),
                 PowerUpKind::FasterRunning => self.boot_sprite.draw(
+                    ctx,
+                    DrawParams::new()
+                        .position(powerup.position)
+                        .scale(Vec2::new(2.5, 2.5)),
+                ),
+                PowerUpKind::TripleShooting => self.ring_sprite.draw(
                     ctx,
                     DrawParams::new()
                         .position(powerup.position)

@@ -55,3 +55,5 @@ pub const EXPLOSION: &[u8] = include_bytes!("../resources/sprites/explosion/expl
 pub const SMOKE: &[u8] = include_bytes!("../resources/sprites/explosion/smoke.png");
 
 pub const BOOT: &[u8] = include_bytes!("../resources/sprites/boot/boot.png");
+
+pub const RING: &[u8] = include_bytes!("../resources/sprites/ring/ring.png");

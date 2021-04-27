@@ -106,6 +106,12 @@ impl GameState {
         }
     }
 
+    fn triple_shoot(&mut self, angle: f32) {
+        self.fireball_mgr.add_projectile(angle - 45.0, self.player.position, Vec2 { x: 6.0, y: 6.0 });
+        self.fireball_mgr.add_projectile(angle, self.player.position, Vec2 { x: 6.0, y: 6.0 });
+        self.fireball_mgr.add_projectile(angle + 45.0, self.player.position, Vec2 { x: 6.0, y: 6.0 });
+    }
+
     // TODO: there's probably a nicer solution to this with algebra
     pub fn check_for_fire(ctx: &mut Context) -> Option<f32> {
         match (left!(ctx), right!(ctx), up!(ctx), down!(ctx)) {
@@ -177,7 +183,14 @@ impl State for GameState {
         graphics::clear(ctx, Color::BLACK);
         self.scaler.draw(ctx);
 
-        window::set_title(ctx, &format!("joguinho - {:.0} FPS - Score: {}", time::get_fps(ctx), self.game_score));
+        window::set_title(
+            ctx,
+            &format!(
+                "joguinho - {:.0} FPS - Score: {}",
+                time::get_fps(ctx),
+                self.game_score
+            ),
+        );
 
         Ok(())
     }
@@ -227,11 +240,15 @@ impl State for GameState {
 
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {
-                self.fireball_mgr.add_projectile(
-                    angle,
-                    self.player.position,
-                    Vec2 { x: 5.0, y: 5.0 },
-                );
+                if self.power_up_mgr.triple_shooting_active() {
+                    self.triple_shoot(angle);
+                } else {
+                    self.fireball_mgr.add_projectile(
+                        angle,
+                        self.player.position,
+                        Vec2 { x: 5.0, y: 5.0 },
+                    );
+                }
                 self.player.register_fire();
             }
         }
@@ -251,8 +268,11 @@ impl State for GameState {
 
         self.power_up_mgr.check_for_collision(&mut self.player);
 
-
-        let hero_speed = if self.power_up_mgr.faster_running_active() { 4.5 } else { 2.1 };
+        let hero_speed = if self.power_up_mgr.faster_running_active() {
+            4.5
+        } else {
+            2.1
+        };
 
         // Checks for WASD presses and updates player location
         self.player.update_from_key_press(ctx, hero_speed);

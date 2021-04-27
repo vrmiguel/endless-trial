@@ -55,22 +55,15 @@ impl EnemyManager {
     }
 
     pub fn calc_score(&self) -> u64 {
-        let enemy_score = |kind| {
-            match kind {
-                HumanoidType::BasicEnemy => 100,
-                HumanoidType::StrongerEnemy => 250,
-                HumanoidType::BadassEnemy => 500,
-                HumanoidType::Boss => 1250,
-                HumanoidType::Player => unreachable!()
-            }
+        let enemy_score = |kind| match kind {
+            HumanoidType::BasicEnemy => 100,
+            HumanoidType::StrongerEnemy => 250,
+            HumanoidType::BadassEnemy => 500,
+            HumanoidType::Boss => 1250,
+            HumanoidType::Player => unreachable!(),
         };
 
-        self
-            .enemies
-            .iter()
-            .map(|e| e.kind())
-            .map(enemy_score)
-            .sum()
+        self.enemies.iter().map(|e| e.kind()).map(enemy_score).sum()
     }
 
     pub fn spawn_enemy(&mut self, ctx: &mut Context, kind: HumanoidType, rng: &mut StdRng) {
@@ -130,7 +123,8 @@ impl EnemyManager {
 
     pub fn clean_up_oob(&mut self) {
         let enemies_before = self.enemies.len();
-        self.enemies.retain(|enemy| !enemy.is_dead() &&  BOUNDS.contains(enemy.position));
+        self.enemies
+            .retain(|enemy| !enemy.is_dead() && BOUNDS.contains(enemy.position));
         if self.enemies.len() < enemies_before {
             debug_println!(
                 "[LOG] {} enemies dropped",
@@ -175,9 +169,6 @@ impl EnemyManager {
             .map(Vec2::into_tuple)
             .map(|(x, y)| Rectangle::new(x + 5.0, y + 5.0, 32.0, 32.0))
             .collect();
-
-        // Enemies that get hit with a fireball will be internally teleported somewhere far away so that our out-of-bounds system removes them
-        let thrown_away_pos = Vec2::new(5000.0, 5000.0);
 
         for (enemy, enemy_rect) in self.enemies.iter_mut().zip(enemy_rects) {
             for fireball in &fireball_rects {

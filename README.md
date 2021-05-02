@@ -1,5 +1,11 @@
-# joguinho
-Early WIP 2D game
+# Endless Trial
+
+Endless Trial is a simple 2D bullet-hell-like game made in Rust with [Tetra](https://github.com/17cupsofcoffee/tetra).
+
+
+## To-do
+
+- [ ] Sound 
 
 
 ## Credits

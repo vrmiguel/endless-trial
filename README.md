@@ -2,6 +2,10 @@
 
 Endless Trial is a simple 2D bullet-hell-like game made in Rust with [Tetra](https://github.com/17cupsofcoffee/tetra).
 
+![Screenshot](https://user-images.githubusercontent.com/36349314/142258988-beb07f32-6d36-4aef-8c92-c3887b7637ce.png)
+
+[Click here](https://streamable.com/hnnjb5) for a small video showing the gameplay
+
 
 ## To-do
 

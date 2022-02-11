@@ -222,7 +222,7 @@ impl Humanoid {
             .map(|(x, y)| Rectangle::new(x, y, 16.0, 16.0))
             .collect();
         for body_rect in &body_rects {
-            if player_rect.intersects(&body_rect) {
+            if player_rect.intersects(body_rect) {
                 return (true, body_rects);
             }
         }

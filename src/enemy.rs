@@ -7,7 +7,7 @@ use tetra::graphics::{Rectangle, Texture};
 use tetra::math::Vec2;
 use tetra::Context;
 
-use crate::resources::{BADASS_GRUNTS, BASIC_GRUNTS, STRONGER_GRUNTS, BOSS};
+use crate::resources::{BADASS_GRUNTS, BASIC_GRUNTS, BOSS, STRONGER_GRUNTS};
 use crate::{
     animation::CannonballAnimation,
     humanoid::{Humanoid, HumanoidType},
@@ -149,23 +149,21 @@ impl EnemyManager {
         }
     }
 
-    // Currently O(n²) :C
     pub fn check_for_fireball_collisions(
         &mut self,
         enemy_rects: &[Rectangle],
         fireballs: &[Projectile],
         one_off_anim_mgr: &mut OneOffAnimationManager,
     ) {
-        let fireball_rects: Vec<_> = fireballs
+        let fireball_rects = fireballs
             .iter()
             .map(|x| x.get_position())
             .map(Vec2::into_tuple)
-            .map(|(x, y)| Rectangle::new(x + 5.0, y + 5.0, 32.0, 32.0))
-            .collect();
+            .map(|(x, y)| Rectangle::new(x + 5.0, y + 5.0, 32.0, 32.0));
 
-        for (enemy, enemy_rect) in self.enemies.iter_mut().zip(enemy_rects) {
-            for fireball in &fireball_rects {
-                if enemy_rect.intersects(fireball) {
+        for fireball in fireball_rects {
+            for (enemy, enemy_rect) in self.enemies.iter_mut().zip(enemy_rects) {
+                if enemy_rect.intersects(&fireball) {
                     let (x, y) = (fireball.x + 5.0, fireball.y + 5.0);
                     one_off_anim_mgr.add_explosion(Vec2 { x, y });
                     // enemy.position = thrown_away_pos;

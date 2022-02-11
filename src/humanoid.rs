@@ -71,9 +71,9 @@ impl Humanoid {
     }
 
     pub fn can_fire(&self) -> bool {
-        let time_since_last_show = self.last_projectile_thrown_time.elapsed();
+        let time_since_last_thrown = self.last_projectile_thrown_time.elapsed();
 
-        time_since_last_show >= self.shooting_wait_time
+        time_since_last_thrown >= self.shooting_wait_time
     }
 
     pub fn register_fire(&mut self) {

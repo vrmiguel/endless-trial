@@ -92,7 +92,7 @@ pub struct GameState {
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> tetra::Result<GameState> {
-        let player_texture = Texture::from_file_data(ctx, resources::HERO)?;
+        let player_texture = Texture::from_encoded(ctx, resources::HERO)?;
 
         let player = Humanoid::new(
             2,
@@ -145,6 +145,7 @@ impl GameState {
                 ScalingMode::ShowAllPixelPerfect => ScalingMode::Crop,
                 ScalingMode::Crop => ScalingMode::CropPixelPerfect,
                 ScalingMode::CropPixelPerfect => ScalingMode::Fixed,
+                _ => ScalingMode::Fixed,
             };
 
             println!("[LOG] Scaling mode changed to {:?}", next);
@@ -242,7 +243,7 @@ impl State for GameState {
         window::set_title(
             ctx,
             &format!(
-                "joguinho - {:.0} FPS - Wave: {} - Score: {}",
+                "Endless Trial - {:.0} FPS - Wave: {} - Score: {}",
                 time::get_fps(ctx),
                 self.current_wave + 1,
                 self.game_score

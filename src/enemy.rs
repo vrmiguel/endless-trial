@@ -87,7 +87,7 @@ impl EnemyManager {
             HumanoidType::Boss => (10, true, Duration::from_secs_f32(0.10)),
         };
 
-        let texture = Texture::from_file_data(ctx, sprite).expect("failed to load built-in sprite");
+        let texture = Texture::from_encoded(ctx, sprite).expect("failed to load built-in sprite");
 
         let enemy_vel = Vec2::new(
             rng.gen_range(0.3..0.7) + self.avg_enemy_vel,

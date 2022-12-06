@@ -75,13 +75,13 @@ pub struct PowerUpManager {
 
 impl PowerUpManager {
     pub fn new(ctx: &mut Context) -> Self {
-        let fire_scroll_sprite = Texture::from_file_data(ctx, resources::FIRE_SCROLL)
+        let fire_scroll_sprite = Texture::from_encoded(ctx, resources::FIRE_SCROLL)
             .expect("failed to load built-in strawberry sprite");
-        let heart_sprite = Texture::from_file_data(ctx, resources::HEART_32X)
+        let heart_sprite = Texture::from_encoded(ctx, resources::HEART_32X)
             .expect("failed to load built-in heart 32x32 sprite");
-        let boot_sprite = Texture::from_file_data(ctx, resources::BOOT)
+        let boot_sprite = Texture::from_encoded(ctx, resources::BOOT)
             .expect("failed to load built-in boot sprite");
-        let ring_sprite = Texture::from_file_data(ctx, resources::RING)
+        let ring_sprite = Texture::from_encoded(ctx, resources::RING)
             .expect("failed to load built-in ring sprite");
 
         Self {

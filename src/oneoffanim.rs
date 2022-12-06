@@ -39,11 +39,11 @@ pub struct OneOffAnimationManager {
 
 impl OneOffAnimationManager {
     pub fn new(ctx: &mut Context) -> Self {
-        let explosion_sprite = Texture::from_file_data(ctx, EXPLOSION)
+        let explosion_sprite = Texture::from_encoded(ctx, EXPLOSION)
             .expect("Failed to load built-in explosion sprite");
 
         let smoke_sprite =
-            Texture::from_file_data(ctx, SMOKE).expect("Failed to load built-in smoke sprite");
+            Texture::from_encoded(ctx, SMOKE).expect("Failed to load built-in smoke sprite");
 
         let explosion_anim = Animation::new(
             explosion_sprite,

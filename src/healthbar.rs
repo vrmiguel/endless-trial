@@ -15,7 +15,7 @@ pub struct HealthBar {
 
 impl HealthBar {
     pub fn new(ctx: &mut Context) -> Self {
-        let heart_sprite = Texture::from_file_data(ctx, resources::HEART_16X)
+        let heart_sprite = Texture::from_encoded(ctx, resources::HEART_16X)
             .expect("could not load built-in heart sprite");
 
         Self {

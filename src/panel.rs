@@ -16,7 +16,7 @@ pub struct Panel {
 
 impl Panel {
     pub fn new(ctx: &mut Context) -> Self {
-        let sprite = Texture::from_file_data(ctx, resources::PANEL)
+        let sprite = Texture::from_encoded(ctx, resources::PANEL)
             .expect("failed to load built-in panel sprite");
 
         Self {

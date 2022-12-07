@@ -4,9 +4,7 @@ use std::{
 };
 
 use rand::{
-    distributions::Standard,
-    prelude::{Distribution, StdRng},
-    Rng, SeedableRng,
+    distributions::Standard, prelude::Distribution, Rng,
 };
 use tetra::{
     graphics::{DrawParams, Rectangle, Texture},
@@ -14,7 +12,10 @@ use tetra::{
     Context,
 };
 
-use crate::{humanoid::Humanoid, panel::Panel, resources};
+use crate::{humanoid::Humanoid, panel::Panel, resources, timer::Timer};
+
+/// Power-ups, after spawned, are available to be picked up within 10 seconds from spawning
+const POWER_UP_AVAILABILITY_INTERVAL: Duration = Duration::from_secs(10);
 
 #[derive(Debug, Hash, Clone, Copy, Eq, PartialEq)]
 pub enum PowerUpKind {

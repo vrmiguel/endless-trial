@@ -6,9 +6,10 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-rand = "0.8.3"
-soloud = "0.3"
+[dependencies.rand]
+version = "0.8.5"
+default-features = false
+features = ["alloc", "small_rng", "getrandom"]
 
 [dependencies.tetra]
 version = "0.7.0"

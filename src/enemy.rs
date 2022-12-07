@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 use rand::{
-    distributions::Uniform, prelude::Distribution, rngs::StdRng,
+    distributions::Uniform, prelude::Distribution,
     seq::SliceRandom, Rng,
 };
 use tetra::{
@@ -59,7 +59,9 @@ impl EnemyManager {
         }
     }
 
-    fn generate_spawn_location(rng: &mut StdRng) -> (f32, f32) {
+    fn generate_spawn_location<R: Rng>(
+        rng: &mut R,
+    ) -> (f32, f32) {
         // These unwraps here are all safe
         let boundary = *[0., 800.].choose(rng).unwrap();
 
@@ -89,11 +91,11 @@ impl EnemyManager {
             .sum()
     }
 
-    pub fn spawn_enemy(
+    pub fn spawn_enemy<R: Rng>(
         &mut self,
         ctx: &mut Context,
         kind: HumanoidType,
-        rng: &mut StdRng,
+        rng: &mut R,
     ) {
         self.last_spawn_time = Instant::now();
         let sprite = match kind {

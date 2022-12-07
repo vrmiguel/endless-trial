@@ -2,7 +2,7 @@ use std::time::{Duration, Instant};
 
 use graphics::Color;
 use rand::{
-    prelude::{SliceRandom, StdRng},
+    prelude::{SliceRandom, SmallRng},
     SeedableRng,
 };
 use tetra::{
@@ -81,7 +81,7 @@ pub struct GameState {
     enemy_mgr: EnemyManager,
     one_off_anim_mgr: OneOffAnimationManager,
     game_over_panel: GameOverPanel,
-    rng: StdRng,
+    rng: SmallRng,
     player_default_shooting_time: Duration,
     game_score: u64,
     current_wave: u8,
@@ -124,7 +124,7 @@ impl GameState {
             game_over_panel: GameOverPanel::new(ctx),
             enemy_mgr: EnemyManager::new(ctx),
             one_off_anim_mgr: OneOffAnimationManager::new(ctx),
-            rng: StdRng::from_entropy(),
+            rng: SmallRng::from_entropy(),
             player_default_shooting_time:
                 Duration::from_secs_f32(0.25),
             game_score: 0,
@@ -364,7 +364,7 @@ impl State for GameState {
         let enemy_score = self.enemy_mgr.calc_score();
 
         if self.power_up_mgr.can_spawn() {
-            self.power_up_mgr.spawn_power_up();
+            self.power_up_mgr.spawn_power_up(&mut self.rng);
         }
 
         self.power_up_mgr.check_for_collision(&mut self.player);

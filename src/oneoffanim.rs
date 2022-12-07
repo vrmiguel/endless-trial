@@ -4,7 +4,9 @@ use std::{
 };
 
 use tetra::{
-    graphics::{animation::Animation, DrawParams, Rectangle, Texture},
+    graphics::{
+        animation::Animation, DrawParams, Rectangle, Texture,
+    },
     math::Vec2,
     Context,
 };
@@ -39,23 +41,30 @@ pub struct OneOffAnimationManager {
 
 impl OneOffAnimationManager {
     pub fn new(ctx: &mut Context) -> Self {
-        let explosion_sprite = Texture::from_encoded(ctx, EXPLOSION)
-            .expect("Failed to load built-in explosion sprite");
+        let explosion_sprite = Texture::from_encoded(
+            ctx, EXPLOSION,
+        )
+        .expect("Failed to load built-in explosion sprite");
 
-        let smoke_sprite =
-            Texture::from_encoded(ctx, SMOKE).expect("Failed to load built-in smoke sprite");
+        let smoke_sprite = Texture::from_encoded(ctx, SMOKE)
+            .expect("Failed to load built-in smoke sprite");
 
         let explosion_anim = Animation::new(
             explosion_sprite,
-            Rectangle::row(0.0, 0.0, 64.0, 64.0).take(10).collect(),
+            Rectangle::row(0.0, 0.0, 64.0, 64.0)
+                .take(10)
+                .collect(),
             Duration::from_secs_f32(0.05),
         );
 
-        let explosion_anim_frames = explosion_anim.frames().len() as u8;
+        let explosion_anim_frames =
+            explosion_anim.frames().len() as u8;
 
         let smoke_anim = Animation::new(
             smoke_sprite,
-            Rectangle::row(0.0, 0.0, 64.0, 64.0).take(6).collect(),
+            Rectangle::row(0.0, 0.0, 64.0, 64.0)
+                .take(6)
+                .collect(),
             Duration::from_secs_f32(0.05),
         );
 
@@ -105,12 +114,15 @@ impl OneOffAnimationManager {
     }
 
     fn clean_up_finished_animations(&mut self) {
-        let explosion_final_frame = self.explosion_anim_frames - 1;
+        let explosion_final_frame =
+            self.explosion_anim_frames - 1;
         let smoke_final_frame = self.smoke_anim_frames - 1;
-        self.explosions
-            .retain(|x| x.current_frame != explosion_final_frame);
+        self.explosions.retain(|x| {
+            x.current_frame != explosion_final_frame
+        });
 
-        self.smokes.retain(|x| x.current_frame != smoke_final_frame);
+        self.smokes
+            .retain(|x| x.current_frame != smoke_final_frame);
     }
 
     pub fn update(&mut self) {
@@ -139,8 +151,9 @@ impl OneOffAnimationManager {
 
     pub fn draw(&mut self, ctx: &mut Context) {
         for explosion in &self.explosions {
-            self.explosion_anim
-                .set_current_frame_index(explosion.current_frame as usize);
+            self.explosion_anim.set_current_frame_index(
+                explosion.current_frame as usize,
+            );
             self.explosion_anim.draw(
                 ctx,
                 DrawParams::new()
@@ -150,8 +163,9 @@ impl OneOffAnimationManager {
         }
 
         for smoke in &self.smokes {
-            self.smoke_anim
-                .set_current_frame_index(smoke.current_frame as usize);
+            self.smoke_anim.set_current_frame_index(
+                smoke.current_frame as usize,
+            );
             self.smoke_anim.draw(
                 ctx,
                 DrawParams::new()

@@ -16,12 +16,16 @@ pub struct Panel {
 
 impl Panel {
     pub fn new(ctx: &mut Context) -> Self {
-        let sprite = Texture::from_encoded(ctx, resources::PANEL)
-            .expect("failed to load built-in panel sprite");
+        let sprite =
+            Texture::from_encoded(ctx, resources::PANEL)
+                .expect("failed to load built-in panel sprite");
 
         Self {
             sprite,
-            config: NineSlice::with_border(Rectangle::new(0.0, 0.0, 32.0, 32.0), 4.0),
+            config: NineSlice::with_border(
+                Rectangle::new(0.0, 0.0, 32.0, 32.0),
+                4.0,
+            ),
         }
     }
 }
@@ -36,8 +40,12 @@ impl GameOverPanel {
         let panel = Panel::new(ctx);
         let text = Text::new(
             "Game over!",
-            Font::from_vector_file_data(ctx, resources::BITPOTION_FONT, 64.0)
-                .expect("Failed to instantiate font"),
+            Font::from_vector_file_data(
+                ctx,
+                resources::BITPOTION_FONT,
+                64.0,
+            )
+            .expect("Failed to instantiate font"),
         );
 
         Self { panel, text }

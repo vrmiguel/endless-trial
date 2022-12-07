@@ -27,13 +27,6 @@ macro_rules! down {
 }
 
 #[macro_export]
-macro_rules! deg_to_rad {
-    ( $angle:expr) => {{
-        input::is_key_down($ctx, Key::Down)
-    }};
-}
-
-#[macro_export]
 #[cfg(debug_assertions)]
 macro_rules! debug_println {
     ($($arg:tt)*) => (println!($($arg)*));

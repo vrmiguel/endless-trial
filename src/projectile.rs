@@ -6,7 +6,7 @@ use tetra::{
     Context,
 };
 
-use crate::{BOUNDS, DEG_TO_RAD};
+use crate::BOUNDS;
 
 #[derive(Clone)]
 pub struct Projectile {
@@ -16,7 +16,7 @@ pub struct Projectile {
 }
 
 impl Projectile {
-    pub fn get_position(&self) -> Vec2<f32> {
+    pub fn position(&self) -> Vec2<f32> {
         self.position
     }
 }
@@ -34,8 +34,13 @@ impl ProjectileManager {
         }
     }
 
-    pub fn add_projectile(&mut self, angle: f32, position: Vec2<f32>, velocity: Vec2<f32>) {
-        let angle_rad = angle * DEG_TO_RAD;
+    pub fn add_projectile(
+        &mut self,
+        angle: f32,
+        position: Vec2<f32>,
+        velocity: Vec2<f32>,
+    ) {
+        let angle_rad = angle.to_radians();
 
         let fireball = Projectile {
             position,
@@ -47,8 +52,11 @@ impl ProjectileManager {
     }
 
     pub fn clean_up_oob(&mut self) {
-        self.projectiles
-            .retain(|fireball| BOUNDS.contains(fireball.get_position()));
+        let is_in_bounds = |fireball: &Projectile| {
+            BOUNDS.contains(fireball.position())
+        };
+
+        self.projectiles.retain(is_in_bounds);
     }
 
     pub fn advance_animation(&mut self, ctx: &mut Context) {
@@ -59,11 +67,12 @@ impl ProjectileManager {
         for fireball in &mut self.projectiles {
             let ang_rad = fireball.angle_rad;
             fireball.position +=
-                Vec2::new(f32::cos(ang_rad), -f32::sin(ang_rad)) * fireball.velocity;
+                Vec2::new(f32::cos(ang_rad), -f32::sin(ang_rad))
+                    * fireball.velocity;
         }
     }
 
-    pub fn projectiles_ref(&self) -> &[Projectile] {
+    pub fn projectiles(&self) -> &[Projectile] {
         &self.projectiles
     }
 

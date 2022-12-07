@@ -168,7 +168,7 @@ impl GameState {
                 _ => ScalingMode::Fixed,
             };
 
-            println!("[LOG] Scaling mode changed to {:?}", next);
+            println!("[LOG] Scaling mode changed to {next:?}");
 
             self.scaler.set_mode(next);
         }

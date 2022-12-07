@@ -12,6 +12,7 @@ mod panel;
 mod powerup;
 mod projectile;
 mod resources;
+mod traits;
 
 use bounds::Bounds;
 use direction::Direction;
@@ -25,7 +26,7 @@ const BOUNDS: Bounds = Bounds::new(800.0, 800.0);
 const VERSION: &str = "0.1.0";
 
 fn main() -> tetra::Result {
-    println!("Endless Trial v{}", VERSION);
+    println!("Endless Trial v{VERSION}");
     ContextBuilder::new("Endless Trial", WIDTH, HEIGHT)
         .quit_on_escape(true)
         .debug_info(true)

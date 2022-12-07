@@ -6,7 +6,7 @@ use tetra::{
     Context,
 };
 
-use crate::BOUNDS;
+use crate::{traits::Cleanable, BOUNDS};
 
 #[derive(Clone)]
 pub struct Projectile {
@@ -26,14 +26,27 @@ pub struct ProjectileManager {
     animation: Animation,
 }
 
+impl Cleanable for ProjectileManager {
+    /// Remove projectiles that have gone out of bounds
+    fn clean_up(&mut self) {
+        let is_in_bounds = |fireball: &Projectile| {
+            BOUNDS.contains(fireball.position())
+        };
+
+        self.projectiles.retain(is_in_bounds);
+    }
+}
+
 impl ProjectileManager {
     pub fn new(animation: Animation) -> Self {
         Self {
-            projectiles: vec![],
+            projectiles: Vec::with_capacity(48),
             animation,
         }
     }
 
+    /// Adds a projectile to this `ProjectileManager`.
+    /// The angle supplied should be in degrees.
     pub fn add_projectile(
         &mut self,
         angle: f32,
@@ -51,18 +64,10 @@ impl ProjectileManager {
         self.projectiles.push(fireball);
     }
 
-    pub fn clean_up_oob(&mut self) {
-        let is_in_bounds = |fireball: &Projectile| {
-            BOUNDS.contains(fireball.position())
-        };
-
-        self.projectiles.retain(is_in_bounds);
-    }
-
     pub fn advance_animation(&mut self, ctx: &mut Context) {
         self.animation.advance(ctx);
 
-        self.clean_up_oob();
+        self.clean_up();
 
         for fireball in &mut self.projectiles {
             let ang_rad = fireball.angle_rad;

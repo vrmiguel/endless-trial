@@ -11,7 +11,10 @@ use tetra::{
     Context,
 };
 
-use crate::resources::{EXPLOSION, SMOKE};
+use crate::{
+    resources::{EXPLOSION, SMOKE},
+    traits::Cleanable,
+};
 
 struct OneOffAnimation {
     current_frame: u8,
@@ -37,6 +40,22 @@ pub struct OneOffAnimationManager {
     smoke_anim_frames: u8,
     explosions: Vec<OneOffAnimation>,
     smokes: Vec<OneOffAnimation>,
+}
+
+impl Cleanable for OneOffAnimationManager {
+    /// Remove animations that have finished
+    fn clean_up(&mut self) {
+        let explosion_final_frame =
+            self.explosion_anim_frames - 1;
+        let smoke_final_frame = self.smoke_anim_frames - 1;
+
+        self.explosions.retain(|x| {
+            x.current_frame != explosion_final_frame
+        });
+
+        self.smokes
+            .retain(|x| x.current_frame != smoke_final_frame);
+    }
 }
 
 impl OneOffAnimationManager {
@@ -113,20 +132,8 @@ impl OneOffAnimationManager {
         self.smokes.push(smoke_anim);
     }
 
-    fn clean_up_finished_animations(&mut self) {
-        let explosion_final_frame =
-            self.explosion_anim_frames - 1;
-        let smoke_final_frame = self.smoke_anim_frames - 1;
-        self.explosions.retain(|x| {
-            x.current_frame != explosion_final_frame
-        });
-
-        self.smokes
-            .retain(|x| x.current_frame != smoke_final_frame);
-    }
-
     pub fn update(&mut self) {
-        self.clean_up_finished_animations();
+        self.clean_up();
 
         if !self.can_update_frames() {
             return;

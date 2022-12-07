@@ -1,8 +1,9 @@
 use std::time::Duration;
 
-use tetra::graphics::Rectangle;
-use tetra::graphics::Texture;
-use tetra::{graphics::animation::Animation, Context};
+use tetra::{
+    graphics::{animation::Animation, Rectangle, Texture},
+    Context,
+};
 
 use crate::resources::{CANNONBALL, FIREBALL};
 
@@ -58,7 +59,8 @@ pub struct FireballAnimation;
 impl FireballAnimation {
     pub fn make_animation(ctx: &mut Context) -> Animation {
         let fireball_texture =
-            Texture::from_encoded(ctx, FIREBALL).expect("couldn't read the fireball sprite");
+            Texture::from_encoded(ctx, FIREBALL)
+                .expect("couldn't read the fireball sprite");
         Animation::new(
             fireball_texture,
             Rectangle::row(0., 0., 32., 32.).take(5).collect(),
@@ -72,7 +74,8 @@ pub struct CannonballAnimation;
 impl CannonballAnimation {
     pub fn make_animation(ctx: &mut Context) -> Animation {
         let cannonball_texture =
-            Texture::from_encoded(ctx, CANNONBALL).expect("couldn't read the cannonball sprite");
+            Texture::from_encoded(ctx, CANNONBALL)
+                .expect("couldn't read the cannonball sprite");
 
         Animation::new(
             cannonball_texture,

@@ -207,6 +207,7 @@ impl Humanoid {
 
     pub fn look_to(&mut self, direction_deg: f32) {
         let direction = |mut angle: f32| -> i32 {
+            // Clamp angle to avoid results not in 0..=3
             if angle < 0. {
                 angle += 360.;
             }
@@ -223,6 +224,8 @@ impl Humanoid {
         }
     }
 
+    /// Returns the angle between the current position of this
+    /// `Humanoid` and `destination'.
     pub fn angle_to_pos(&self, destination: Vec2<f32>) -> f32 {
         let pos = self.position;
 
@@ -233,7 +236,7 @@ impl Humanoid {
         f32::atan2(delta_y, delta_x)
     }
 
-    pub fn get_rect(&self) -> Rectangle {
+    pub fn rectangle(&self) -> Rectangle {
         Rectangle::new(
             self.position.x,
             self.position.y,
@@ -260,7 +263,7 @@ impl Humanoid {
         &self,
         bodies: &[Humanoid],
     ) -> (bool, Vec<Rectangle>) {
-        let player_rect = self.get_rect();
+        let player_rect = self.rectangle();
         let body_rects: Vec<_> = bodies
             .iter()
             .map(|e| e.position)

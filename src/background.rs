@@ -29,49 +29,100 @@ struct Grass {
 impl Grass {
     pub fn load(ctx: &mut Context) -> Self {
         Self {
-            left: Texture::from_encoded(ctx, resources::GRASS_LEFT).unwrap(),
-            lower: Texture::from_encoded(ctx, resources::GRASS_LOWER).unwrap(),
-            lower_left: Texture::from_encoded(ctx, resources::GRASS_LOWER_LEFT).unwrap(),
-            lower_right: Texture::from_encoded(ctx, resources::GRASS_LOWER_RIGHT).unwrap(),
-            top_left: Texture::from_encoded(ctx, resources::GRASS_TOP_LEFT).unwrap(),
-            top: Texture::from_encoded(ctx, resources::GRASS_TOP).unwrap(),
-            top_right: Texture::from_encoded(ctx, resources::GRASS_TOP_RIGHT).unwrap(),
-            right: Texture::from_encoded(ctx, resources::GRASS_RIGHT).unwrap(),
+            left: Texture::from_encoded(
+                ctx,
+                resources::GRASS_LEFT,
+            )
+            .unwrap(),
+            lower: Texture::from_encoded(
+                ctx,
+                resources::GRASS_LOWER,
+            )
+            .unwrap(),
+            lower_left: Texture::from_encoded(
+                ctx,
+                resources::GRASS_LOWER_LEFT,
+            )
+            .unwrap(),
+            lower_right: Texture::from_encoded(
+                ctx,
+                resources::GRASS_LOWER_RIGHT,
+            )
+            .unwrap(),
+            top_left: Texture::from_encoded(
+                ctx,
+                resources::GRASS_TOP_LEFT,
+            )
+            .unwrap(),
+            top: Texture::from_encoded(
+                ctx,
+                resources::GRASS_TOP,
+            )
+            .unwrap(),
+            top_right: Texture::from_encoded(
+                ctx,
+                resources::GRASS_TOP_RIGHT,
+            )
+            .unwrap(),
+            right: Texture::from_encoded(
+                ctx,
+                resources::GRASS_RIGHT,
+            )
+            .unwrap(),
         }
     }
 
     pub fn draw(&self, ctx: &mut Context) {
         for x in (32..725).step_by(75) {
-            self.lower
-                .draw(ctx, DrawParams::new().position(Vec2::new(x as f32, 768.0)));
+            self.lower.draw(
+                ctx,
+                DrawParams::new()
+                    .position(Vec2::new(x as f32, 768.0)),
+            );
         }
 
         for y in (32..768).step_by(32) {
-            self.left
-                .draw(ctx, DrawParams::new().position(Vec2::new(0.0, y as f32)));
+            self.left.draw(
+                ctx,
+                DrawParams::new()
+                    .position(Vec2::new(0.0, y as f32)),
+            );
         }
 
         for y in (32..768).step_by(32) {
-            self.right
-                .draw(ctx, DrawParams::new().position(Vec2::new(768., y as f32)));
+            self.right.draw(
+                ctx,
+                DrawParams::new()
+                    .position(Vec2::new(768., y as f32)),
+            );
         }
 
         for x in (32..770).step_by(70) {
-            self.top
-                .draw(ctx, DrawParams::new().position(Vec2::new(x as f32, 0.0)));
+            self.top.draw(
+                ctx,
+                DrawParams::new()
+                    .position(Vec2::new(x as f32, 0.0)),
+            );
         }
 
-        self.lower_left
-            .draw(ctx, DrawParams::new().position(Vec2::new(0.0, 768.0)));
-        self.lower_right
-            .draw(ctx, DrawParams::new().position(Vec2::new(768.0, 768.0)));
-        self.top_left
-            .draw(ctx, DrawParams::new().position(Vec2::new(0., 0.)));
-        self.top_right
-            .draw(ctx, DrawParams::new().position(Vec2::new(768., 0.0)));
+        self.lower_left.draw(
+            ctx,
+            DrawParams::new().position(Vec2::new(0.0, 768.0)),
+        );
+        self.lower_right.draw(
+            ctx,
+            DrawParams::new().position(Vec2::new(768.0, 768.0)),
+        );
+        self.top_left.draw(
+            ctx,
+            DrawParams::new().position(Vec2::new(0., 0.)),
+        );
+        self.top_right.draw(
+            ctx,
+            DrawParams::new().position(Vec2::new(768., 0.0)),
+        );
     }
 }
-
 
 const ROCK_1_POINTS: [Vec2<f32>; 4] = [
     Vec2::new(50.0, 60.),
@@ -106,10 +157,20 @@ impl Background {
     pub fn new(ctx: &mut Context) -> Self {
         Self {
             grass: Grass::load(ctx),
-            grass_1: Texture::from_encoded(ctx, resources::GRASS_DETAIL_1).unwrap(),
-            grass_2: Texture::from_encoded(ctx, resources::GRASS_DETAIL_2).unwrap(),
-            rock_1: Texture::from_encoded(ctx, resources::ROCK1).unwrap(),
-            rock_2: Texture::from_encoded(ctx, resources::ROCK2).unwrap(),
+            grass_1: Texture::from_encoded(
+                ctx,
+                resources::GRASS_DETAIL_1,
+            )
+            .unwrap(),
+            grass_2: Texture::from_encoded(
+                ctx,
+                resources::GRASS_DETAIL_2,
+            )
+            .unwrap(),
+            rock_1: Texture::from_encoded(ctx, resources::ROCK1)
+                .unwrap(),
+            rock_2: Texture::from_encoded(ctx, resources::ROCK2)
+                .unwrap(),
         }
     }
 
@@ -139,13 +200,17 @@ impl Background {
         }
 
         for point in &ROCK_1_POINTS {
-            self.rock_1
-                .draw(ctx, DrawParams::new().position(*point).scale(scale));
+            self.rock_1.draw(
+                ctx,
+                DrawParams::new().position(*point).scale(scale),
+            );
         }
 
         for point in &ROCK_2_POINTS {
-            self.rock_2
-                .draw(ctx, DrawParams::new().position(*point).scale(scale));
+            self.rock_2.draw(
+                ctx,
+                DrawParams::new().position(*point).scale(scale),
+            );
         }
     }
 }

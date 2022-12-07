@@ -27,26 +27,33 @@ pub enum PowerUpKind {
 
 #[derive(Debug)]
 struct PowerUp {
+    /// What sort of power-up this iss
     kind: PowerUpKind,
-    spawned_time: Instant,
+    /// Times how long this power-up will be available for
+    expiration_timer: Timer,
+    /// The position the power-up was spawned in
     position: Vec2<f32>,
+    /// Whether or not this power-up has been consumed
     was_consumed: bool,
+    /// Set if the power-up is flickering (that is, next to expirating)
     flickering: u8,
 }
 
 impl PowerUp {
     pub fn is_expired(&self) -> bool {
-        let elapsed = self.spawned_time.elapsed();
-
-        elapsed > Duration::from_secs_f32(10.0)
+        self.expiration_timer.is_ready()
     }
 
     pub fn flicker_if_almost_expiring(&mut self) {
+        // If flickering is already set then do nothing
         if self.flickering > 0 {
             return;
         }
-        let elapsed = self.spawned_time.elapsed();
-        if elapsed > Duration::from_secs_f32(8.0) {
+
+        let elapsed = self.expiration_timer.elapsed();
+        if elapsed > Duration::from_secs(8) {
+            // Only two more seconds available to get the power-up,
+            // so we'll signal this to the player through flickering
             self.flickering = 120;
         }
     }
@@ -84,7 +91,7 @@ impl PowerUpManager {
         let fire_scroll_sprite =
             Texture::from_encoded(ctx, resources::FIRE_SCROLL)
                 .expect(
-                    "failed to load built-in strawberry sprite",
+                    "failed to load built-in fire scroll sprite",
                 );
         let heart_sprite =
             Texture::from_encoded(ctx, resources::HEART_32X)
@@ -93,17 +100,17 @@ impl PowerUpManager {
                 );
         let boot_sprite =
             Texture::from_encoded(ctx, resources::BOOT)
-                .expect("failed to load built-in boot sprite");
+                .unwrap();
         let ring_sprite =
             Texture::from_encoded(ctx, resources::RING)
-                .expect("failed to load built-in ring sprite");
+                .unwrap();
 
         Self {
             fire_scroll_sprite,
             heart_sprite,
             boot_sprite,
             ring_sprite,
-            powerups: vec![],
+            powerups: Vec::with_capacity(5),
             active_powerups: HashMap::new(),
             last_spawned_time: Instant::now(),
             panel: Panel::new(ctx),
@@ -165,7 +172,7 @@ impl PowerUpManager {
     pub fn can_spawn(&self) -> bool {
         let time_since_last_throw =
             self.last_spawned_time.elapsed();
-        time_since_last_throw > Duration::from_secs_f64(5.00)
+        time_since_last_throw > Duration::from_secs(5)
     }
 
     fn draw_powerup_bar(&self, ctx: &mut Context) {
@@ -277,15 +284,15 @@ impl PowerUpManager {
         });
 
         self.powerups
-            .iter_mut()
-            .for_each(|p| p.flicker_if_almost_expiring());
-        self.powerups
             .retain(|p| !p.was_consumed && !p.is_expired());
+
+        self.powerups
+            .iter_mut()
+            .for_each(PowerUp::flicker_if_almost_expiring);
     }
 
-    pub fn spawn_power_up(&mut self) {
+    pub fn spawn_power_up<R: Rng>(&mut self, rng: &mut R) {
         self.last_spawned_time = Instant::now();
-        let mut rng = StdRng::from_entropy();
         let position = Vec2 {
             x: rng.gen_range(0.0..800.0),
             y: rng.gen_range(0.0..800.0),
@@ -293,8 +300,8 @@ impl PowerUpManager {
 
         let power_up = PowerUp {
             kind: rng.gen(),
-            spawned_time: self.last_spawned_time,
             position,
+            expiration_timer: Timer::start_now_with_interval(POWER_UP_AVAILABILITY_INTERVAL),
             was_consumed: false,
             flickering: 0,
         };

@@ -12,6 +12,7 @@ mod panel;
 mod powerup;
 mod projectile;
 mod resources;
+mod timer;
 mod traits;
 
 use bounds::Bounds;

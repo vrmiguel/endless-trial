@@ -14,6 +14,9 @@ use tetra::{
 
 use crate::{humanoid::Humanoid, panel::Panel, resources, timer::Timer};
 
+/// New power-ups spawn every 5 seconds
+const POWER_UP_SPAWN_INTERVAL: Duration = Duration::from_secs(5);
+
 /// Power-ups, after spawned, are available to be picked up within 10 seconds from spawning
 const POWER_UP_AVAILABILITY_INTERVAL: Duration = Duration::from_secs(10);
 
@@ -82,7 +85,7 @@ pub struct PowerUpManager {
     powerups: Vec<PowerUp>,
     // Timed power-ups consumed
     active_powerups: HashMap<PowerUpKind, Instant>,
-    last_spawned_time: Instant,
+    spawn_timer: Timer,
     panel: Panel,
 }
 
@@ -112,7 +115,7 @@ impl PowerUpManager {
             ring_sprite,
             powerups: Vec::with_capacity(5),
             active_powerups: HashMap::new(),
-            last_spawned_time: Instant::now(),
+            spawn_timer: Timer::start_now_with_interval(POWER_UP_SPAWN_INTERVAL),
             panel: Panel::new(ctx),
         }
     }
@@ -170,9 +173,7 @@ impl PowerUpManager {
     }
 
     pub fn can_spawn(&self) -> bool {
-        let time_since_last_throw =
-            self.last_spawned_time.elapsed();
-        time_since_last_throw > Duration::from_secs(5)
+        self.spawn_timer.is_ready()
     }
 
     fn draw_powerup_bar(&self, ctx: &mut Context) {
@@ -291,8 +292,16 @@ impl PowerUpManager {
             .for_each(PowerUp::flicker_if_almost_expiring);
     }
 
+    pub fn advance<R: Rng>(&mut self, rng: &mut R, player: &mut Humanoid) {
+        if self.can_spawn() {
+            self.spawn_power_up(rng);
+        }
+
+        self.check_for_collision(player);
+    }
+
     pub fn spawn_power_up<R: Rng>(&mut self, rng: &mut R) {
-        self.last_spawned_time = Instant::now();
+        self.spawn_timer.reset();
         let position = Vec2 {
             x: rng.gen_range(0.0..800.0),
             y: rng.gen_range(0.0..800.0),

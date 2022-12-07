@@ -363,11 +363,7 @@ impl State for GameState {
 
         let enemy_score = self.enemy_mgr.calc_score();
 
-        if self.power_up_mgr.can_spawn() {
-            self.power_up_mgr.spawn_power_up(&mut self.rng);
-        }
-
-        self.power_up_mgr.check_for_collision(&mut self.player);
+        self.power_up_mgr.advance(&mut self.rng, &mut self.player);
 
         let hero_speed =
             if self.power_up_mgr.faster_running_active() {

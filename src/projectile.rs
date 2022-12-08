@@ -45,6 +45,35 @@ impl ProjectileManager {
         }
     }
 
+    pub fn shoot(
+        &mut self,
+        is_triple_shooting: bool,
+        angle: f32,
+        position: Vec2<f32>,
+        velocity: Vec2<f32>,
+    ) {
+        if is_triple_shooting {
+            self.send_triple_shot(angle, position, velocity);
+        } else {
+            self.add_projectile(angle, position, velocity)
+        }
+    }
+
+    fn send_triple_shot(
+        &mut self,
+        angle: f32,
+        position: Vec2<f32>,
+        velocity: Vec2<f32>,
+    ) {
+        for deviation in [-45.0, 0.0, 45.0] {
+            self.add_projectile(
+                angle + deviation,
+                position,
+                velocity,
+            );
+        }
+    }
+
     /// Adds a projectile to this `ProjectileManager`.
     /// The angle supplied should be in degrees.
     pub fn add_projectile(

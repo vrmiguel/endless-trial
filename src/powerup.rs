@@ -16,7 +16,7 @@ use crate::{
 };
 
 /// New power-ups spawn every 5 seconds
-const POWER_UP_SPAWN_INTERVAL: Duration = Duration::from_secs(5);
+const POWER_UP_SPAWN_INTERVAL: Duration = Duration::from_secs(3);
 
 /// Power-ups, after spawned, are available to be picked up
 /// within 10 seconds from spawning
@@ -173,17 +173,14 @@ impl PowerUpManager {
         }
     }
 
+    /// Check if the given humanoid collided with a power-up
+    /// laying in the ground.
     pub fn check_for_collision(
         &mut self,
-        player: &mut Humanoid,
+        humanoid: &mut Humanoid,
     ) {
-        let player_pos = player.position;
-        let player_rect = Rectangle::new(
-            player_pos.x,
-            player_pos.y,
-            16.0,
-            16.0,
-        );
+        let pos = humanoid.position;
+        let rect = Rectangle::new(pos.x, pos.y, 16.0, 16.0);
         for powerup in &mut self.powerups {
             let powerup_rect = Rectangle::new(
                 powerup.position.x,
@@ -192,14 +189,16 @@ impl PowerUpManager {
                 32.0,
             );
 
-            if powerup_rect.intersects(&player_rect) {
+            if powerup_rect.intersects(&rect) {
                 powerup.was_consumed = true;
                 match powerup.kind {
                     PowerUpKind::AdditionalHeart => {
-                        player.hearts += 1
+                        humanoid.hearts += 1
                     }
-                    p => {
-                        player.power_ups.activate_power_up(p);
+                    power_up => {
+                        humanoid
+                            .power_ups
+                            .activate_power_up(power_up);
                     }
                 }
             }

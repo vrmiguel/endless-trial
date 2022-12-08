@@ -233,14 +233,15 @@ impl State for GameState {
         // Checks if the current wave is over
         self.check_for_wave_change();
 
-        // Check if the player collided with an enemy
-        // We return enemy_rects here (Vec of Retangles for each
-        // enemy) in order to reuse it in
-        // .check_for_fireball_collisions
+        // Check if the player collided with an enemy.
+        //
+        // We return `enemy_rects` here (Vec of Retangles for
+        // each enemy) in order to reuse it in
+        // `check_for_fireball_collisions`
         let (collided_with_an_enemy, enemy_rects) = self
             .player_manager
             .player_mut()
-            .collided_with_bodies(self.enemy_mgr.enemies());
+            .collided_with_bodies(&self.enemy_mgr.enemies);
 
         if collided_with_an_enemy {
             self.player_manager.register_hit();
@@ -261,13 +262,16 @@ impl State for GameState {
             &mut self.one_off_anim_mgr,
         );
 
+        // Check if any enemy got a power-up
+        for enemy in self.enemy_mgr.enemies.iter_mut() {
+            self.power_up_mgr.check_for_collision(enemy);
+        }
+
         self.power_up_mgr.advance(
             &mut self.rng,
             self.player_manager.player_mut(),
         );
 
-        // Update the player given the active power ups at the
-        // moment
         self.player_manager.update(ctx);
 
         if self.enemy_mgr.can_spawn() {

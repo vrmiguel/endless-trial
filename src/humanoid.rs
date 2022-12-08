@@ -287,12 +287,13 @@ impl Humanoid {
         )
     }
 
-    pub fn head_to(&mut self, destination: Vec2<f32>) {
+    pub fn head_to(&mut self, is_running_fast: bool, destination: Vec2<f32>) {
+        let modifier = if is_running_fast { 1.5 } else { 1.0 };
         let theta_rad = self.angle_to_pos(destination);
 
         self.position +=
             Vec2::new(f32::cos(theta_rad), -f32::sin(theta_rad))
-                * self.velocity;
+                * self.velocity * modifier;
 
         // Sets the Humanoid's Direction according to the
         // calculated angle

@@ -39,16 +39,6 @@ impl PlayerManager {
         &mut self.player
     }
 
-    fn send_triple_shot(&mut self, angle: f32) {
-        for deviation in [-45.0, 0.0, 45.0] {
-            self.fireball_mgr.add_projectile(
-                angle + deviation,
-                self.player.position,
-                Vec2 { x: 6.0, y: 6.0 },
-            );
-        }
-    }
-
     pub fn fireballs(&self) -> &[Projectile] {
         self.fireball_mgr.projectiles()
     }
@@ -74,15 +64,13 @@ impl PlayerManager {
 
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {
-                if triple_shooting_active {
-                    self.send_triple_shot(angle)
-                } else {
-                    self.fireball_mgr.add_projectile(
-                        angle,
-                        self.player.position,
-                        Vec2 { x: 5.0, y: 5.0 },
-                    )
-                }
+                self.fireball_mgr.shoot(
+                    triple_shooting_active,
+                    angle,
+                    self.player.position,
+                    Vec2 { x: 5.5, y: 5.5 },
+                );
+
                 self.player.shooting_behavior.register_fire();
             }
         }

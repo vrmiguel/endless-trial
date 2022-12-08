@@ -19,7 +19,7 @@ use crate::{
 
 pub struct EnemyManager {
     /// All enemies currently spawned
-    enemies: Vec<Humanoid>,
+    pub enemies: Vec<Humanoid>,
     /// Times the interval in which enemies can be spawned
     spawn_timer: Timer,
     /// Average enemy velocity
@@ -159,13 +159,26 @@ impl EnemyManager {
         self.projectile_mgr.advance_animation(ctx);
 
         for enemy in &mut self.enemies {
+
+            let (
+                is_fast_shooting,
+                is_fast_running,
+                is_triple_shooting,
+            ) = enemy.power_ups.currently_active();
+            let velocity = if is_fast_shooting {
+                Vec2 { x: 6.5, y: 6.5 }
+            } else {
+                Vec2 { x: 4.5, y: 4.5 }
+            };
+
             if enemy.can_fire() {
                 let angle_to_player_deg =
                     enemy.angle_to_pos(player_pos).to_degrees();
-                self.projectile_mgr.add_projectile(
+                self.projectile_mgr.shoot(
+                    is_triple_shooting,
                     angle_to_player_deg,
                     enemy.position,
-                    Vec2 { x: 4.5, y: 4.5 },
+                    velocity,
                 );
                 enemy.shooting_behavior.register_fire();
             }
@@ -173,7 +186,7 @@ impl EnemyManager {
             // Advance the animation of all enemies and update
             // their locations
             enemy.advance_animation(ctx);
-            enemy.head_to(player_pos);
+            enemy.head_to(is_fast_running, player_pos);
         }
     }
 
@@ -226,10 +239,6 @@ impl EnemyManager {
                 one_off_anim_mgr.add_smoke(cannon_pos);
             }
         }
-    }
-
-    pub fn enemies(&self) -> &[Humanoid] {
-        &self.enemies
     }
 
     pub fn draw(&mut self, ctx: &mut Context) {

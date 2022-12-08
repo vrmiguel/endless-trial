@@ -38,21 +38,13 @@ impl PlayerManager {
     }
 
     fn send_triple_shot(&mut self, angle: f32) {
-        self.fireball_mgr.add_projectile(
-            angle - 45.0,
-            self.player.position,
-            Vec2 { x: 6.0, y: 6.0 },
-        );
-        self.fireball_mgr.add_projectile(
-            angle,
-            self.player.position,
-            Vec2 { x: 6.0, y: 6.0 },
-        );
-        self.fireball_mgr.add_projectile(
-            angle + 45.0,
-            self.player.position,
-            Vec2 { x: 6.0, y: 6.0 },
-        );
+        for deviation in [-45.0, 0.0, 45.0] {
+            self.fireball_mgr.add_projectile(
+                angle + deviation,
+                self.player.position,
+                Vec2 { x: 6.0, y: 6.0 },
+            );
+        }
     }
 
     pub fn fireballs(&self) -> &[Projectile] {
@@ -67,12 +59,14 @@ impl PlayerManager {
         faster_running_active: bool,
     ) {
         let wait_time = if faster_shooting_active {
-                Duration::from_secs_f32(0.08)
+            Duration::from_secs_f32(0.08)
         } else {
-                Duration::from_secs_f32(0.25)  
+            Duration::from_secs_f32(0.25)
         };
 
-        self.player.shooting_behavior.set_shooting_wait_time(wait_time);
+        self.player
+            .shooting_behavior
+            .set_shooting_wait_time(wait_time);
 
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {

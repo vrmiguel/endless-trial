@@ -45,7 +45,8 @@ impl ShootingBehavior {
         let time_since_last_thrown =
             self.last_projectile_thrown_time.elapsed();
 
-        self.allowed_to_shoot && time_since_last_thrown >= self.shooting_wait_time
+        self.allowed_to_shoot
+            && time_since_last_thrown >= self.shooting_wait_time
     }
 
     pub fn register_fire(&mut self) {
@@ -58,7 +59,6 @@ impl ShootingBehavior {
     ) {
         self.shooting_wait_time = duration;
     }
-
 }
 
 /// A humanoid: either the player or enemies.s
@@ -90,14 +90,17 @@ impl Humanoid {
             flickering: 0,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
-            shooting_behavior: ShootingBehavior::new(allowed_to_shoot, shooting_wait_time),
+            shooting_behavior: ShootingBehavior::new(
+                allowed_to_shoot,
+                shooting_wait_time,
+            ),
             position,
             velocity,
             kind,
         }
     }
 
-    pub fn can_fire(& self) -> bool {
+    pub fn can_fire(&self) -> bool {
         self.shooting_behavior.can_fire()
     }
 

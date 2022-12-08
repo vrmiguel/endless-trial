@@ -13,6 +13,7 @@ mod player;
 mod powerup;
 mod projectile;
 mod resources;
+mod textures;
 mod timer;
 mod traits;
 

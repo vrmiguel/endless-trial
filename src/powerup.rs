@@ -1,8 +1,6 @@
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
+use arrayvec::ArrayVec;
 use rand::{
     distributions::Standard, prelude::Distribution, Rng,
 };
@@ -26,11 +24,83 @@ const POWER_UP_AVAILABILITY_INTERVAL: Duration =
     Duration::from_secs(10);
 
 #[derive(Debug, Hash, Clone, Copy, Eq, PartialEq)]
+#[repr(C)]
 pub enum PowerUpKind {
     AdditionalHeart,
     FasterShooting,
     FasterRunning,
     TripleShooting,
+}
+
+impl From<PowerUpKind> for u8 {
+    fn from(kind: PowerUpKind) -> Self {
+        match kind {
+            PowerUpKind::AdditionalHeart => 0,
+            PowerUpKind::FasterShooting => 1,
+            PowerUpKind::FasterRunning => 2,
+            PowerUpKind::TripleShooting => 3,
+        }
+    }
+}
+
+pub struct ActivePowerUps {
+    pub slots: [Option<Instant>; 3],
+}
+
+impl ActivePowerUps {
+    pub fn new() -> Self {
+        Self { slots: [None; 3] }
+    }
+
+    pub fn currently_active(&self) -> (bool, bool, bool) {
+        (
+            self.get(PowerUpKind::FasterShooting).is_some(),
+            self.get(PowerUpKind::FasterRunning).is_some(),
+            self.get(PowerUpKind::TripleShooting).is_some(),
+        )
+    }
+
+    /// How many kinds of power-ups are currently active
+    pub fn len(&self) -> usize {
+        let (a, b, c) = self.currently_active();
+
+        ((a as u8) + (b as u8) + (c as u8)) as usize
+    }
+
+    /// An iterator of all active power-ups when called
+    pub fn iter(&self) -> impl Iterator<Item = PowerUpKind> {
+        let mut power_ups: ArrayVec<PowerUpKind, 3> =
+            ArrayVec::new();
+
+        let (fast_shooting, fast_running, triple_shooting) =
+            self.currently_active();
+
+        if fast_running {
+            power_ups.push(PowerUpKind::FasterRunning)
+        }
+
+        if fast_shooting {
+            power_ups.push(PowerUpKind::FasterShooting)
+        }
+
+        if triple_shooting {
+            power_ups.push(PowerUpKind::TripleShooting)
+        }
+
+        power_ups.into_iter()
+    }
+
+    pub fn activate_power_up(&mut self, kind: PowerUpKind) {
+        let idx: u8 = kind.into();
+
+        self.slots[idx as usize - 1] = Some(Instant::now());
+    }
+
+    fn get(&self, kind: PowerUpKind) -> Option<Instant> {
+        let idx: u8 = kind.into();
+
+        self.slots[idx as usize - 1]
+    }
 }
 
 #[derive(Debug)]
@@ -86,8 +156,6 @@ impl Distribution<PowerUpKind> for Standard {
 pub struct PowerUpManager {
     // The power-ups laying on the ground
     powerups: Vec<PowerUp>,
-    // Timed power-ups consumed
-    active_powerups: HashMap<PowerUpKind, Instant>,
     spawn_timer: Timer,
     panel: Panel,
     power_up_textures: PowerUpTextures,
@@ -98,7 +166,6 @@ impl PowerUpManager {
         Self {
             power_up_textures: PowerUpTextures::load(ctx),
             powerups: Vec::with_capacity(5),
-            active_powerups: HashMap::new(),
             spawn_timer: Timer::start_now_with_interval(
                 POWER_UP_SPAWN_INTERVAL,
             ),
@@ -132,38 +199,23 @@ impl PowerUpManager {
                         player.hearts += 1
                     }
                     p => {
-                        self.active_powerups
-                            .insert(p, Instant::now());
+                        player.power_ups.activate_power_up(p);
                     }
                 }
             }
         }
     }
 
-    pub fn faster_shooting_active(&self) -> bool {
-        self.active_powerups
-            .get(&PowerUpKind::FasterShooting)
-            .is_some()
-    }
-
-    pub fn faster_running_active(&self) -> bool {
-        self.active_powerups
-            .get(&PowerUpKind::FasterRunning)
-            .is_some()
-    }
-
-    pub fn triple_shooting_active(&self) -> bool {
-        self.active_powerups
-            .get(&PowerUpKind::TripleShooting)
-            .is_some()
-    }
-
     pub fn can_spawn(&self) -> bool {
         self.spawn_timer.is_ready()
     }
 
-    fn draw_powerup_bar(&self, ctx: &mut Context) {
-        let active_powerups_no = self.active_powerups.len();
+    fn draw_powerup_bar(
+        &self,
+        ctx: &mut Context,
+        player_power_ups: &ActivePowerUps,
+    ) {
+        let active_powerups_no = player_power_ups.len();
         if active_powerups_no == 0 {
             return;
         }
@@ -179,10 +231,8 @@ impl PowerUpManager {
                 .position(Vec2::new(768.0 - width, 60.0)),
         );
 
-        for (kind, spacing) in self
-            .active_powerups
-            .keys()
-            .zip(0..active_powerups_no)
+        for (kind, spacing) in
+            player_power_ups.iter().zip(0..active_powerups_no)
         {
             let spacing = spacing as f32;
             match kind {
@@ -219,8 +269,12 @@ impl PowerUpManager {
         }
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {
-        self.draw_powerup_bar(ctx);
+    pub fn draw(
+        &mut self,
+        ctx: &mut Context,
+        player_power_ups: &ActivePowerUps,
+    ) {
+        self.draw_powerup_bar(ctx, player_power_ups);
 
         for powerup in self.powerups.iter_mut() {
             if powerup.flickering > 0 {
@@ -268,10 +322,6 @@ impl PowerUpManager {
     }
 
     pub fn update(&mut self) {
-        self.active_powerups.retain(|_, instant| {
-            instant.elapsed() < Duration::from_secs_f32(5.0)
-        });
-
         self.powerups
             .retain(|p| !p.was_consumed && !p.is_expired());
 

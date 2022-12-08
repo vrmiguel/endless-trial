@@ -8,7 +8,9 @@ use crate::{
     humanoid::{Humanoid, HumanoidType},
     left,
     projectile::{Projectile, ProjectileManager},
-    resources, right, up,
+    resources, right,
+    traits::Cleanable,
+    up,
 };
 
 pub struct PlayerManager {
@@ -51,13 +53,15 @@ impl PlayerManager {
         self.fireball_mgr.projectiles()
     }
 
-    pub fn update(
-        &mut self,
-        ctx: &mut Context,
-        faster_shooting_active: bool,
-        triple_shooting_active: bool,
-        faster_running_active: bool,
-    ) {
+    pub fn update(&mut self, ctx: &mut Context) {
+        self.player.clean_up();
+
+        let (
+            faster_shooting_active,
+            triple_shooting_active,
+            faster_running_active,
+        ) = self.player.power_ups.currently_active();
+
         let wait_time = if faster_shooting_active {
             Duration::from_secs_f32(0.08)
         } else {

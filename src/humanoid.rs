@@ -9,7 +9,10 @@ use tetra::{
     Context,
 };
 
-use crate::{animation::HumanoidAnimation, Direction, BOUNDS};
+use crate::{
+    animation::HumanoidAnimation, powerup::ActivePowerUps,
+    traits::Cleanable, Direction, BOUNDS,
+};
 
 #[derive(Clone, Copy)]
 pub enum HumanoidType {
@@ -64,15 +67,30 @@ impl ShootingBehavior {
 /// A humanoid: either the player or enemies.s
 pub struct Humanoid {
     pub hearts: u8,
-    direction: Direction,
-    animation: HumanoidAnimation,
+    pub direction: Direction,
+    pub animation: HumanoidAnimation,
+    pub power_ups: ActivePowerUps,
     pub position: Vec2<f32>,
-    velocity: Vec2<f32>,
+    pub velocity: Vec2<f32>,
     pub shooting_behavior: ShootingBehavior,
     /// Set when the humanoid should 'flicker', such as when the
     /// player is hit
     pub flickering: u16,
-    kind: HumanoidType,
+    pub kind: HumanoidType,
+}
+
+impl Cleanable for Humanoid {
+    fn clean_up(&mut self) {
+        for power_up in self.power_ups.slots.iter_mut() {
+            if let Some(moment_started) = power_up {
+                if moment_started.elapsed()
+                    >= Duration::from_secs(5)
+                {
+                    *power_up = None;
+                }
+            }
+        }
+    }
 }
 
 impl Humanoid {
@@ -94,6 +112,7 @@ impl Humanoid {
                 allowed_to_shoot,
                 shooting_wait_time,
             ),
+            power_ups: ActivePowerUps::new(),
             position,
             velocity,
             kind,

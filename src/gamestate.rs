@@ -183,7 +183,10 @@ impl State for GameState {
 
         self.player_manager.draw(ctx);
         self.enemy_mgr.draw(ctx);
-        self.power_up_mgr.draw(ctx);
+        self.power_up_mgr.draw(
+            ctx,
+            &self.player_manager.player_mut().power_ups,
+        );
         self.health_bar.draw(ctx, self.player_manager.hearts());
         self.one_off_anim_mgr.draw(ctx);
 
@@ -265,12 +268,7 @@ impl State for GameState {
 
         // Update the player given the active power ups at the
         // moment
-        self.player_manager.update(
-            ctx,
-            self.power_up_mgr.faster_shooting_active(),
-            self.power_up_mgr.triple_shooting_active(),
-            self.power_up_mgr.faster_running_active(),
-        );
+        self.player_manager.update(ctx);
 
         if self.enemy_mgr.can_spawn() {
             let kind = WAVES[self.current_wave as usize]

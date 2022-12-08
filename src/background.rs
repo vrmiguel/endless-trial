@@ -1,5 +1,5 @@
 use tetra::{
-    graphics::{Color, DrawParams, Texture},
+    graphics::{self, Color, DrawParams, Texture},
     math::Vec2,
     Context,
 };
@@ -176,6 +176,15 @@ impl Background {
 
     pub fn draw(&self, ctx: &mut Context) {
         let scale = Vec2::new(1.5, 1.5);
+
+        graphics::clear(
+            ctx,
+            Color::rgb(
+                118.0 / 255.0,
+                197.0 / 255.0,
+                100.0 / 255.0,
+            ),
+        );
 
         self.grass.draw(ctx);
 

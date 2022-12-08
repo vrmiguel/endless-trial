@@ -1,6 +1,5 @@
 use std::time::{Duration, Instant};
 
-use graphics::Color;
 use rand::{
     prelude::{SliceRandom, SmallRng},
     SeedableRng,
@@ -82,6 +81,9 @@ pub struct GameState {
     current_wave: u8,
     /// How long every wave lasts
     wave_timer: Timer,
+    window_title_update_timer: Timer,
+    #[cfg(debug_assertions)]
+    diagnostics: Diagnostics,
 }
 
 impl GameState {
@@ -108,6 +110,12 @@ impl GameState {
             wave_timer: Timer::start_now_with_interval(
                 Duration::from_secs(30),
             ),
+            #[cfg(debug_assertions)]
+            diagnostics: Diagnostics::new(),
+            window_title_update_timer:
+                Timer::start_now_with_interval(
+                    Duration::from_secs(1),
+                ),
         };
 
         // How long we took to instantiate all textures into GPU
@@ -166,15 +174,10 @@ impl GameState {
 
 impl State for GameState {
     fn draw(&mut self, ctx: &mut Context) -> tetra::Result {
+        #[cfg(debug_assertions)]
+        self.diagnostics.start_polling();
+
         graphics::set_canvas(ctx, self.scaler.canvas());
-        graphics::clear(
-            ctx,
-            Color::rgb(
-                118.0 / 255.0,
-                197.0 / 255.0,
-                100.0 / 255.0,
-            ),
-        );
 
         self.background.draw(ctx);
 
@@ -189,23 +192,32 @@ impl State for GameState {
         }
 
         graphics::reset_canvas(ctx);
-        graphics::clear(ctx, Color::BLACK);
         self.scaler.draw(ctx);
 
-        window::set_title(
-            ctx,
-            &format!(
-                "Endless Trial - {:.0} FPS - Wave: {} - Score: {}",
-                time::get_fps(ctx),
-                self.current_wave + 1,
-                self.game_score
-            ),
-        );
+        if self.window_title_update_timer.is_ready() {
+            self.window_title_update_timer.reset();
+
+            window::set_title(
+                ctx,
+                &format!(
+                    "Endless Trial - {:.0} FPS - Wave: {} - Score: {}",
+                    time::get_fps(ctx),
+                    self.current_wave + 1,
+                    self.game_score
+                ),
+            );
+        }
+
+        #[cfg(debug_assertions)]
+        self.diagnostics.finish_polling(PollKind::Drawing);
 
         Ok(())
     }
 
     fn update(&mut self, ctx: &mut Context) -> tetra::Result {
+        #[cfg(debug_assertions)]
+        self.diagnostics.start_polling();
+
         // Checks if the player changed the screen scaling method
         self.check_for_scale_change(ctx);
 
@@ -277,6 +289,9 @@ impl State for GameState {
         self.game_score +=
             enemy_score - self.enemy_mgr.calc_score();
 
+        #[cfg(debug_assertions)]
+        self.diagnostics.finish_polling(PollKind::Update);
+
         Ok(())
     }
 
@@ -288,6 +303,85 @@ impl State for GameState {
         if let Event::Resized { width, height } = event {
             self.scaler.set_outer_size(width, height);
         }
+
         Ok(())
     }
+}
+
+#[cfg(debug_assertions)]
+struct Diagnostics {
+    /// How often we print the game diagnostics
+    /// to stdout
+    flush_timer: Timer,
+    /// How much it took in average to draw a new frame
+    /// during the last polling interval
+    avg_draw_time: Duration,
+    /// How much it took in average to update the game state
+    /// during the last polling interval
+    avg_update_time: Duration,
+    current_polling_started: Instant,
+    times_polled: u32,
+}
+
+#[cfg(debug_assertions)]
+impl Diagnostics {
+    pub fn new() -> Self {
+        Self {
+            flush_timer: Timer::start_now_with_interval(
+                Duration::from_secs(15),
+            ),
+            avg_draw_time: Duration::new(0, 0),
+            avg_update_time: Duration::new(0, 0),
+            current_polling_started: Instant::now(),
+            times_polled: 0,
+        }
+    }
+
+    pub fn start_polling(&mut self) {
+        self.current_polling_started = Instant::now()
+    }
+
+    pub fn finish_polling(&mut self, kind: PollKind) {
+        self.times_polled += 1;
+
+        let elapsed = self.current_polling_started.elapsed();
+
+        if self.times_polled == 1 {
+            match kind {
+                PollKind::Drawing => {
+                    self.avg_draw_time = elapsed
+                }
+                PollKind::Update => {
+                    self.avg_update_time = elapsed
+                }
+            }
+            return;
+        }
+
+        match kind {
+            PollKind::Drawing => {
+                self.avg_draw_time += elapsed;
+            }
+            PollKind::Update => {
+                self.avg_update_time += elapsed;
+            }
+        }
+
+        if self.flush_timer.is_ready() {
+            self.flush_timer.reset();
+            let avg_draw_time =
+                self.avg_draw_time / self.times_polled;
+            let avg_update_time =
+                self.avg_update_time / self.times_polled;
+
+            println!("Last {} frames: avg. draw {}ns, avg. update {}ns", self.times_polled, avg_draw_time.as_nanos(), avg_update_time.as_nanos());
+        }
+    }
+}
+
+#[cfg(debug_assertions)]
+#[derive(Clone, Copy)]
+enum PollKind {
+    Drawing,
+    Update,
 }

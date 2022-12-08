@@ -258,6 +258,13 @@ impl State for GameState {
             &mut self.one_off_anim_mgr,
         );
 
+        self.power_up_mgr.advance(
+            &mut self.rng,
+            self.player_manager.player_mut(),
+        );
+
+        // Update the player given the active power ups at the
+        // moment
         self.player_manager.update(
             ctx,
             self.power_up_mgr.faster_shooting_active(),
@@ -273,12 +280,9 @@ impl State for GameState {
             self.enemy_mgr.spawn_enemy(kind, &mut self.rng);
         }
 
+        // Calculate the enemy score now that new enemies have
+        // been spawned
         let enemy_score = self.enemy_mgr.calc_score();
-
-        self.power_up_mgr.advance(
-            &mut self.rng,
-            self.player_manager.player_mut(),
-        );
 
         self.one_off_anim_mgr.update();
 
@@ -287,6 +291,8 @@ impl State for GameState {
 
         self.power_up_mgr.update();
 
+        // If the game score has decreased then enemies have been
+        // killed, which adds to the game score
         self.game_score +=
             enemy_score - self.enemy_mgr.calc_score();
 

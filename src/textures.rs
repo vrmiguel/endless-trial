@@ -7,7 +7,7 @@ use tetra::{graphics::Texture, Context};
 use crate::{
     humanoid::HumanoidType,
     resources::{
-        BADASS_GRUNTS, BASIC_GRUNTS, BOSS, STRONGER_GRUNTS,
+        self, BADASS_GRUNTS, BASIC_GRUNTS, BOSS, STRONGER_GRUNTS,
     },
 };
 
@@ -82,5 +82,39 @@ impl GruntTextures {
             HumanoidType::Boss => &self.boss,
         }
         .clone() // Texture is an Rc so this clone is cheap
+    }
+}
+
+pub struct PowerUpTextures {
+    pub fire_scroll_sprite: Texture,
+    pub heart_sprite: Texture,
+    pub boot_sprite: Texture,
+    pub ring_sprite: Texture,
+}
+
+impl PowerUpTextures {
+    pub fn load(ctx: &mut Context) -> Self {
+        Self {
+            fire_scroll_sprite: Texture::from_encoded(
+                ctx,
+                resources::FIRE_SCROLL,
+            )
+            .unwrap(),
+            heart_sprite: Texture::from_encoded(
+                ctx,
+                resources::HEART_32X,
+            )
+            .unwrap(),
+            boot_sprite: Texture::from_encoded(
+                ctx,
+                resources::BOOT,
+            )
+            .unwrap(),
+            ring_sprite: Texture::from_encoded(
+                ctx,
+                resources::RING,
+            )
+            .unwrap(),
+        }
     }
 }

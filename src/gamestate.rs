@@ -1,4 +1,4 @@
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use graphics::Color;
 use rand::{
@@ -28,8 +28,9 @@ use crate::{
     panel::GameOverPanel,
     powerup::PowerUpManager,
     projectile::ProjectileManager,
-    resources::{self},
-    right, up, HEIGHT, WIDTH,
+    resources, right,
+    timer::Timer,
+    up, HEIGHT, WIDTH,
 };
 
 const WAVES: [[(HumanoidType, f32); 4]; 6] = [
@@ -85,7 +86,8 @@ pub struct GameState {
     player_default_shooting_time: Duration,
     game_score: u64,
     current_wave: u8,
-    start_of_this_wave: Instant,
+    /// How long every wave lasts
+    wave_timer: Timer,
 }
 
 impl GameState {
@@ -129,18 +131,18 @@ impl GameState {
                 Duration::from_secs_f32(0.25),
             game_score: 0,
             current_wave: 0,
-            start_of_this_wave: Instant::now(),
+            wave_timer: Timer::start_now_with_interval(
+                Duration::from_secs(30),
+            ),
         })
     }
 
     fn check_for_wave_change(&mut self) {
-        let elapsed = self.start_of_this_wave.elapsed();
-
-        if elapsed > Duration::from_secs(30)
+        if self.wave_timer.is_ready()
             && self.current_wave < (WAVES.len() as u8 - 1)
         {
             self.current_wave += 1;
-            self.start_of_this_wave = Instant::now();
+            self.wave_timer.reset();
             println!(
                 "Commencing wave {}",
                 self.current_wave + 1
@@ -363,7 +365,8 @@ impl State for GameState {
 
         let enemy_score = self.enemy_mgr.calc_score();
 
-        self.power_up_mgr.advance(&mut self.rng, &mut self.player);
+        self.power_up_mgr
+            .advance(&mut self.rng, &mut self.player);
 
         let hero_speed =
             if self.power_up_mgr.faster_running_active() {

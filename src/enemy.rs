@@ -1,4 +1,4 @@
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use rand::{
     distributions::Uniform, prelude::Distribution,
@@ -19,13 +19,18 @@ use crate::{
     resources::{
         BADASS_GRUNTS, BASIC_GRUNTS, BOSS, STRONGER_GRUNTS,
     },
+    timer::Timer,
     traits::Cleanable,
 };
 
 pub struct EnemyManager {
+    /// All enemies currently spawned
     enemies: Vec<Humanoid>,
-    last_spawn_time: Instant,
+    /// Times the interval in which enemies can be spawned
+    spawn_timer: Timer,
+    /// Average enemy velocity
     avg_enemy_vel: f32,
+    /// Spawns and cleans up projectiles coming from enemies
     projectile_mgr: ProjectileManager,
 }
 
@@ -50,9 +55,11 @@ impl EnemyManager {
             CannonballAnimation::make_animation(ctx);
 
         Self {
-            enemies: vec![],
-            last_spawn_time: Instant::now(),
+            enemies: Vec::with_capacity(24),
             avg_enemy_vel: 1.0,
+            spawn_timer: Timer::start_now_with_interval(
+                Duration::from_secs_f64(1.5),
+            ),
             projectile_mgr: ProjectileManager::new(
                 cannonball_animation,
             ),
@@ -97,7 +104,8 @@ impl EnemyManager {
         kind: HumanoidType,
         rng: &mut R,
     ) {
-        self.last_spawn_time = Instant::now();
+        self.spawn_timer.reset();
+
         let sprite = match kind {
             HumanoidType::Player => panic!(
                 "An enemy cannot have the player's sprite"
@@ -157,10 +165,7 @@ impl EnemyManager {
     }
 
     pub fn can_spawn(&self) -> bool {
-        let time_since_last_spawn =
-            self.last_spawn_time.elapsed();
-
-        time_since_last_spawn > Duration::from_secs_f64(1.5)
+        self.spawn_timer.is_ready()
     }
 
     pub fn update(

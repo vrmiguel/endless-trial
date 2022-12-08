@@ -12,13 +12,17 @@ use tetra::{
     Context,
 };
 
-use crate::{humanoid::Humanoid, panel::Panel, resources, timer::Timer};
+use crate::{
+    humanoid::Humanoid, panel::Panel, resources, timer::Timer,
+};
 
 /// New power-ups spawn every 5 seconds
 const POWER_UP_SPAWN_INTERVAL: Duration = Duration::from_secs(5);
 
-/// Power-ups, after spawned, are available to be picked up within 10 seconds from spawning
-const POWER_UP_AVAILABILITY_INTERVAL: Duration = Duration::from_secs(10);
+/// Power-ups, after spawned, are available to be picked up
+/// within 10 seconds from spawning
+const POWER_UP_AVAILABILITY_INTERVAL: Duration =
+    Duration::from_secs(10);
 
 #[derive(Debug, Hash, Clone, Copy, Eq, PartialEq)]
 pub enum PowerUpKind {
@@ -38,7 +42,8 @@ struct PowerUp {
     position: Vec2<f32>,
     /// Whether or not this power-up has been consumed
     was_consumed: bool,
-    /// Set if the power-up is flickering (that is, next to expirating)
+    /// Set if the power-up is flickering (that is, next to
+    /// expirating)
     flickering: u8,
 }
 
@@ -55,8 +60,9 @@ impl PowerUp {
 
         let elapsed = self.expiration_timer.elapsed();
         if elapsed > Duration::from_secs(8) {
-            // Only two more seconds available to get the power-up,
-            // so we'll signal this to the player through flickering
+            // Only two more seconds available to get the
+            // power-up, so we'll signal this to the
+            // player through flickering
             self.flickering = 120;
         }
     }
@@ -102,11 +108,9 @@ impl PowerUpManager {
                     "failed to load built-in heart 32x32 sprite",
                 );
         let boot_sprite =
-            Texture::from_encoded(ctx, resources::BOOT)
-                .unwrap();
+            Texture::from_encoded(ctx, resources::BOOT).unwrap();
         let ring_sprite =
-            Texture::from_encoded(ctx, resources::RING)
-                .unwrap();
+            Texture::from_encoded(ctx, resources::RING).unwrap();
 
         Self {
             fire_scroll_sprite,
@@ -115,7 +119,9 @@ impl PowerUpManager {
             ring_sprite,
             powerups: Vec::with_capacity(5),
             active_powerups: HashMap::new(),
-            spawn_timer: Timer::start_now_with_interval(POWER_UP_SPAWN_INTERVAL),
+            spawn_timer: Timer::start_now_with_interval(
+                POWER_UP_SPAWN_INTERVAL,
+            ),
             panel: Panel::new(ctx),
         }
     }
@@ -292,7 +298,11 @@ impl PowerUpManager {
             .for_each(PowerUp::flicker_if_almost_expiring);
     }
 
-    pub fn advance<R: Rng>(&mut self, rng: &mut R, player: &mut Humanoid) {
+    pub fn advance<R: Rng>(
+        &mut self,
+        rng: &mut R,
+        player: &mut Humanoid,
+    ) {
         if self.can_spawn() {
             self.spawn_power_up(rng);
         }
@@ -310,7 +320,9 @@ impl PowerUpManager {
         let power_up = PowerUp {
             kind: rng.gen(),
             position,
-            expiration_timer: Timer::start_now_with_interval(POWER_UP_AVAILABILITY_INTERVAL),
+            expiration_timer: Timer::start_now_with_interval(
+                POWER_UP_AVAILABILITY_INTERVAL,
+            ),
             was_consumed: false,
             flickering: 0,
         };

@@ -239,7 +239,7 @@ impl EnemyManager {
         self.projectile_mgr.advance_animation(ctx);
 
         for enemy in &mut self.enemies {
-            if enemy.allowed_to_shoot && enemy.can_fire() {
+            if enemy.can_fire() {
                 let angle_to_player_deg =
                     enemy.angle_to_pos(player_pos).to_degrees();
                 self.projectile_mgr.add_projectile(
@@ -247,7 +247,7 @@ impl EnemyManager {
                     enemy.position,
                     Vec2 { x: 4.5, y: 4.5 },
                 );
-                enemy.register_fire();
+                enemy.shooting_behavior.register_fire();
             }
 
             // Advance the animation of all enemies and update

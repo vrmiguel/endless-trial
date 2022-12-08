@@ -66,15 +66,13 @@ impl PlayerManager {
         triple_shooting_active: bool,
         faster_running_active: bool,
     ) {
-        if faster_shooting_active {
-            self.player.set_shooting_wait_time(
-                Duration::from_secs_f32(0.08),
-            )
+        let wait_time = if faster_shooting_active {
+                Duration::from_secs_f32(0.08)
         } else {
-            self.player.set_shooting_wait_time(
-                Duration::from_secs_f32(0.25),
-            );
-        }
+                Duration::from_secs_f32(0.25)  
+        };
+
+        self.player.shooting_behavior.set_shooting_wait_time(wait_time);
 
         if self.player.can_fire() {
             if let Some(angle) = Self::check_for_fire(ctx) {
@@ -87,7 +85,7 @@ impl PlayerManager {
                         Vec2 { x: 5.0, y: 5.0 },
                     )
                 }
-                self.player.register_fire();
+                self.player.shooting_behavior.register_fire();
             }
         }
 

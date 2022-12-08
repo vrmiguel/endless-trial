@@ -20,24 +20,58 @@ pub enum HumanoidType {
     Boss,
 }
 
-pub struct Humanoid {
-    pub hearts: u8,
-    direction: Direction,
-    animation: HumanoidAnimation,
-    pub position: Vec2<f32>,
-    velocity: Vec2<f32>,
-    /// Set when the humanoid should 'flicker', such as when the
-    /// player is hit
-    pub flickering: u16,
-
-    // TODO: these three shooting-related variables should
-    // belong to a struct/enum of their own
+pub struct ShootingBehavior {
     /// Determines if the humanoid can shoot
     pub allowed_to_shoot: bool,
     /// The last moment that this humanoid shot a projectile   
     last_projectile_thrown_time: Instant,
     /// The interval in which this humanoid can shoot
     shooting_wait_time: Duration,
+}
+
+impl ShootingBehavior {
+    pub fn new(
+        allowed_to_shoot: bool,
+        shooting_wait_time: Duration,
+    ) -> Self {
+        Self {
+            allowed_to_shoot,
+            last_projectile_thrown_time: Instant::now(),
+            shooting_wait_time,
+        }
+    }
+
+    pub fn can_fire(&self) -> bool {
+        let time_since_last_thrown =
+            self.last_projectile_thrown_time.elapsed();
+
+        self.allowed_to_shoot && time_since_last_thrown >= self.shooting_wait_time
+    }
+
+    pub fn register_fire(&mut self) {
+        self.last_projectile_thrown_time = Instant::now();
+    }
+
+    pub fn set_shooting_wait_time(
+        &mut self,
+        duration: Duration,
+    ) {
+        self.shooting_wait_time = duration;
+    }
+
+}
+
+/// A humanoid: either the player or enemies.s
+pub struct Humanoid {
+    pub hearts: u8,
+    direction: Direction,
+    animation: HumanoidAnimation,
+    pub position: Vec2<f32>,
+    velocity: Vec2<f32>,
+    pub shooting_behavior: ShootingBehavior,
+    /// Set when the humanoid should 'flicker', such as when the
+    /// player is hit
+    pub flickering: u16,
     kind: HumanoidType,
 }
 
@@ -56,35 +90,19 @@ impl Humanoid {
             flickering: 0,
             direction: Direction::North,
             animation: HumanoidAnimation::new(texture),
-            allowed_to_shoot,
-            last_projectile_thrown_time: Instant::now(),
-            shooting_wait_time,
+            shooting_behavior: ShootingBehavior::new(allowed_to_shoot, shooting_wait_time),
             position,
             velocity,
             kind,
         }
     }
 
-    pub fn set_shooting_wait_time(
-        &mut self,
-        duration: Duration,
-    ) {
-        self.shooting_wait_time = duration;
+    pub fn can_fire(& self) -> bool {
+        self.shooting_behavior.can_fire()
     }
 
     pub fn kind(&self) -> HumanoidType {
         self.kind
-    }
-
-    pub fn can_fire(&self) -> bool {
-        let time_since_last_thrown =
-            self.last_projectile_thrown_time.elapsed();
-
-        time_since_last_thrown >= self.shooting_wait_time
-    }
-
-    pub fn register_fire(&mut self) {
-        self.last_projectile_thrown_time = Instant::now();
     }
 
     pub fn advance_animation(&mut self, ctx: &mut Context) {
@@ -205,6 +223,8 @@ impl Humanoid {
         }
     }
 
+    /// Make this [`Humanoid`] look in the given direction (in
+    /// degrees)
     pub fn look_to(&mut self, direction_deg: f32) {
         let direction = |mut angle: f32| -> i32 {
             // Clamp angle to avoid results not in 0..=3

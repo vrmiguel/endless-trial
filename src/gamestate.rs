@@ -194,6 +194,7 @@ impl State for GameState {
         graphics::reset_canvas(ctx);
         self.scaler.draw(ctx);
 
+        // Update the window title only once per second
         if self.window_title_update_timer.is_ready() {
             self.window_title_update_timer.reset();
 

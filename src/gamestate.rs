@@ -74,6 +74,7 @@ const WAVES: [[(HumanoidType, f32); 4]; 6] = [
 
 pub struct GameState {
     scaler: ScreenScaler,
+    /// The textures of the game's background
     background: Background,
     health_bar: HealthBar,
     player: Humanoid,
@@ -106,8 +107,7 @@ impl GameState {
         );
         let background = Background::new(ctx);
 
-        let fireball_animation =
-            FireballAnimation::make_animation(ctx);
+        let fireball_animation = FireballAnimation::build(ctx);
 
         Ok(GameState {
             player,
@@ -360,7 +360,7 @@ impl State for GameState {
                 .choose_weighted(&mut self.rng, |x| x.1)
                 .expect("WAVES should not be empty")
                 .0;
-            self.enemy_mgr.spawn_enemy(ctx, kind, &mut self.rng);
+            self.enemy_mgr.spawn_enemy(kind, &mut self.rng);
         }
 
         let enemy_score = self.enemy_mgr.calc_score();

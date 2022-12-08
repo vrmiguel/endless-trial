@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use arrayvec::ArrayVec;
 use rand::{
     distributions::Uniform, prelude::Distribution,
     seq::SliceRandom, Rng,
@@ -23,6 +24,70 @@ use crate::{
     traits::Cleanable,
 };
 
+/// Loads all grunt sprites into memory to avoid
+/// recreating the texture when spawning enemies
+struct GruntTextures {
+    basic_grunts: [Texture; BASIC_GRUNTS.len()],
+    stronger_grunts: [Texture; STRONGER_GRUNTS.len()],
+    badass_grunts: [Texture; BADASS_GRUNTS.len()],
+    boss: Texture,
+}
+
+impl GruntTextures {
+    fn load_textures<const N: usize>(
+        ctx: &mut Context,
+        sprites: &[&[u8]],
+    ) -> [Texture; N] {
+        let mut textures: ArrayVec<Texture, N> = ArrayVec::new();
+
+        for sprite in sprites {
+            textures.push(
+                Texture::from_encoded(ctx, sprite).unwrap(),
+            );
+        }
+
+        textures.into_inner().unwrap()
+    }
+
+    pub fn load(ctx: &mut Context) -> Self {
+        Self {
+            basic_grunts: Self::load_textures(ctx, BASIC_GRUNTS),
+            stronger_grunts: Self::load_textures(
+                ctx,
+                STRONGER_GRUNTS,
+            ),
+            badass_grunts: Self::load_textures(
+                ctx,
+                BADASS_GRUNTS,
+            ),
+            boss: Texture::from_encoded(ctx, BOSS).unwrap(),
+        }
+    }
+
+    pub fn choose_texture_from_kind<R: Rng>(
+        &self,
+        kind: HumanoidType,
+        rng: &mut R,
+    ) -> Texture {
+        match kind {
+            HumanoidType::Player => unreachable!(
+                "An enemy cannot have the player's sprite"
+            ),
+            HumanoidType::BasicEnemy => {
+                self.basic_grunts.choose(rng).unwrap()
+            }
+            HumanoidType::StrongerEnemy => {
+                self.stronger_grunts.choose(rng).unwrap()
+            }
+            HumanoidType::BadassEnemy => {
+                self.badass_grunts.choose(rng).unwrap()
+            }
+            HumanoidType::Boss => &self.boss,
+        }
+        .clone()
+    }
+}
+
 pub struct EnemyManager {
     /// All enemies currently spawned
     enemies: Vec<Humanoid>,
@@ -32,6 +97,7 @@ pub struct EnemyManager {
     avg_enemy_vel: f32,
     /// Spawns and cleans up projectiles coming from enemies
     projectile_mgr: ProjectileManager,
+    textures: GruntTextures,
 }
 
 impl Cleanable for EnemyManager {
@@ -52,7 +118,7 @@ impl Cleanable for EnemyManager {
 impl EnemyManager {
     pub fn new(ctx: &mut Context) -> Self {
         let cannonball_animation =
-            CannonballAnimation::make_animation(ctx);
+            CannonballAnimation::build(ctx);
 
         Self {
             enemies: Vec::with_capacity(24),
@@ -63,6 +129,7 @@ impl EnemyManager {
             projectile_mgr: ProjectileManager::new(
                 cannonball_animation,
             ),
+            textures: GruntTextures::load(ctx),
         }
     }
 
@@ -100,27 +167,10 @@ impl EnemyManager {
 
     pub fn spawn_enemy<R: Rng>(
         &mut self,
-        ctx: &mut Context,
         kind: HumanoidType,
         rng: &mut R,
     ) {
         self.spawn_timer.reset();
-
-        let sprite = match kind {
-            HumanoidType::Player => panic!(
-                "An enemy cannot have the player's sprite"
-            ),
-            HumanoidType::BasicEnemy => BASIC_GRUNTS
-                .choose(rng)
-                .expect("BASIC_GRUNTS should not be empty"),
-            HumanoidType::StrongerEnemy => STRONGER_GRUNTS
-                .choose(rng)
-                .expect("STRONGER_GRUNTS should not be empty"),
-            HumanoidType::BadassEnemy => BADASS_GRUNTS
-                .choose(rng)
-                .expect("BADASS_GRUNTS should not be empty"),
-            HumanoidType::Boss => &BOSS,
-        };
 
         let (lives, allowed_to_shoot, shooting_wait_time) =
             match kind {
@@ -139,8 +189,8 @@ impl EnemyManager {
                 }
             };
 
-        let texture = Texture::from_encoded(ctx, sprite)
-            .expect("failed to load built-in sprite");
+        let texture =
+            self.textures.choose_texture_from_kind(kind, rng);
 
         let enemy_vel = Vec2::new(
             rng.gen_range(0.3..0.7) + self.avg_enemy_vel,

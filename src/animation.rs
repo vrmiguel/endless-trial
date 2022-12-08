@@ -57,7 +57,7 @@ impl HumanoidAnimation {
 pub struct FireballAnimation;
 
 impl FireballAnimation {
-    pub fn make_animation(ctx: &mut Context) -> Animation {
+    pub fn build(ctx: &mut Context) -> Animation {
         let fireball_texture =
             Texture::from_encoded(ctx, FIREBALL)
                 .expect("couldn't read the fireball sprite");
@@ -72,7 +72,7 @@ impl FireballAnimation {
 pub struct CannonballAnimation;
 
 impl CannonballAnimation {
-    pub fn make_animation(ctx: &mut Context) -> Animation {
+    pub fn build(ctx: &mut Context) -> Animation {
         let cannonball_texture =
             Texture::from_encoded(ctx, CANNONBALL)
                 .expect("couldn't read the cannonball sprite");

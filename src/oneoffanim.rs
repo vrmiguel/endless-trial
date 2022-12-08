@@ -125,6 +125,9 @@ impl OneOffAnimationManager {
 
     pub fn add_smoke(&mut self, position: Vec2<f32>) {
         if !self.can_add_smoke() {
+            // Avoid spawning many smoke animations in the same
+            // place (e.g. if the fireball hits the
+            // enemy but he doesn't die)
             return;
         }
         self.last_smoke_added_time = Instant::now();

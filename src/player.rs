@@ -1,12 +1,14 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use tetra::{graphics::Texture, math::Vec2, Context};
 
 use crate::{
     animation::FireballAnimation,
+    down,
     humanoid::{Humanoid, HumanoidType},
+    left,
     projectile::{Projectile, ProjectileManager},
-    resources, left, right, up, down,
+    resources, right, up,
 };
 
 pub struct PlayerManager {
@@ -90,23 +92,21 @@ impl PlayerManager {
         }
 
         let hero_speed =
-            if faster_running_active {
-                4.5
-            } else {
-                2.1
-            };
+            if faster_running_active { 4.5 } else { 2.1 };
 
         // Checks for WASD presses and updates player location
         self.player.update_from_key_press(ctx, hero_speed);
     }
 
     pub fn new(ctx: &mut Context) -> Self {
+        let now = Instant::now();
+
         let player_texture =
             Texture::from_encoded(ctx, resources::HERO).unwrap();
 
         let fireball_animation = FireballAnimation::build(ctx);
 
-        Self {
+        let player_mgr = Self {
             player: Humanoid::new(
                 2,
                 player_texture,
@@ -119,7 +119,14 @@ impl PlayerManager {
             fireball_mgr: ProjectileManager::new(
                 fireball_animation,
             ),
-        }
+        };
+
+        println!(
+            "Built PlayerManager in {}ms",
+            now.elapsed().as_millis()
+        );
+
+        player_mgr
     }
 
     // TODO: there's probably a nicer solution to this with

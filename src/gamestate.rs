@@ -7,25 +7,17 @@ use rand::{
 };
 use tetra::{
     graphics,
-    graphics::{
-        scaling::{ScalingMode, ScreenScaler},
-        
-    },
+    graphics::scaling::{ScalingMode, ScreenScaler},
     input::{self, Key},
     time, window, Context, Event, State,
 };
 
 use crate::{
-    background::Background,
-    enemy::EnemyManager,
-    healthbar::HealthBar,
-    humanoid::{HumanoidType},
-    oneoffanim::OneOffAnimationManager,
-    panel::GameOverPanel,
-    player::PlayerManager,
-    powerup::PowerUpManager,
-    timer::Timer,
-    HEIGHT, WIDTH,
+    background::Background, enemy::EnemyManager,
+    healthbar::HealthBar, humanoid::HumanoidType,
+    oneoffanim::OneOffAnimationManager, panel::GameOverPanel,
+    player::PlayerManager, powerup::PowerUpManager,
+    timer::Timer, HEIGHT, WIDTH,
 };
 
 /// Enemy types and their spawn rate percentages for each wave
@@ -118,6 +110,8 @@ impl GameState {
             ),
         };
 
+        // How long we took to instantiate all textures into GPU
+        // memory and build the managers
         println!(
             "Built initial GameState in {}ms",
             now.elapsed().as_millis()
@@ -275,7 +269,8 @@ impl State for GameState {
 
         self.one_off_anim_mgr.update();
 
-        self.enemy_mgr.update(ctx, self.player_manager.player_position());
+        self.enemy_mgr
+            .update(ctx, self.player_manager.player_position());
 
         self.power_up_mgr.update();
 

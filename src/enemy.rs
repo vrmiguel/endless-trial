@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use arrayvec::ArrayVec;
 use rand::{
@@ -50,7 +50,9 @@ impl GruntTextures {
     }
 
     pub fn load(ctx: &mut Context) -> Self {
-        Self {
+        let now = Instant::now();
+
+        let textures = Self {
             basic_grunts: Self::load_textures(ctx, BASIC_GRUNTS),
             stronger_grunts: Self::load_textures(
                 ctx,
@@ -61,7 +63,14 @@ impl GruntTextures {
                 BADASS_GRUNTS,
             ),
             boss: Texture::from_encoded(ctx, BOSS).unwrap(),
-        }
+        };
+
+        println!(
+            "Loaded all enemy textures into GPU memory in {}ms",
+            now.elapsed().as_millis()
+        );
+
+        textures
     }
 
     pub fn choose_texture_from_kind<R: Rng>(

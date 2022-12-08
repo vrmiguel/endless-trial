@@ -60,6 +60,8 @@ impl Cleanable for OneOffAnimationManager {
 
 impl OneOffAnimationManager {
     pub fn new(ctx: &mut Context) -> Self {
+        let now = Instant::now();
+
         let explosion_sprite = Texture::from_encoded(
             ctx, EXPLOSION,
         )
@@ -89,7 +91,7 @@ impl OneOffAnimationManager {
 
         let smoke_anim_frames = smoke_anim.frames().len() as u8;
 
-        Self {
+        let mgr = Self {
             last_updated_time: Instant::now(),
             last_explosion_added_time: Instant::now(),
             last_smoke_added_time: Instant::now(),
@@ -97,9 +99,16 @@ impl OneOffAnimationManager {
             explosion_anim_frames,
             smoke_anim,
             smoke_anim_frames,
-            explosions: vec![],
-            smokes: vec![],
-        }
+            explosions: Vec::with_capacity(12),
+            smokes: Vec::with_capacity(12),
+        };
+
+        println!(
+            "Built OneOffAnimationManager in {}ms",
+            now.elapsed().as_millis()
+        );
+
+        mgr
     }
 
     pub fn add_explosion(&mut self, position: Vec2<f32>) {

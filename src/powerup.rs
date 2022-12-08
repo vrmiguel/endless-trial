@@ -345,8 +345,8 @@ impl PowerUpManager {
         self.spawn_timer.reset();
 
         let position = Vec2 {
-            x: rng.gen_range(0.0..800.0),
-            y: rng.gen_range(0.0..800.0),
+            x: rng.gen_range(0.0..200.0) * 4.0,
+            y: rng.gen_range(0.0..200.0) * 4.0,
         };
 
         let power_up = PowerUp {

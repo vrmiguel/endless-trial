@@ -166,7 +166,7 @@ impl EnemyManager {
                 is_triple_shooting,
             ) = enemy.power_ups.currently_active();
             let velocity = if is_fast_shooting {
-                Vec2 { x: 6.5, y: 6.5 }
+                Vec2 { x: 7.5, y: 7.5 }
             } else {
                 Vec2 { x: 4.5, y: 4.5 }
             };

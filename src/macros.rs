@@ -1,28 +1,28 @@
 #[macro_export]
 macro_rules! left {
     ( $ctx:expr) => {{
-        input::is_key_down($ctx, Key::Left)
+        tetra::input::is_key_down($ctx, tetra::input::Key::Left)
     }};
 }
 
 #[macro_export]
 macro_rules! right {
     ( $ctx:expr) => {{
-        input::is_key_down($ctx, Key::Right)
+        tetra::input::is_key_down($ctx, tetra::input::Key::Right)
     }};
 }
 
 #[macro_export]
 macro_rules! up {
     ( $ctx:expr) => {{
-        input::is_key_down($ctx, Key::Up)
+        tetra::input::is_key_down($ctx, tetra::input::Key::Up)
     }};
 }
 
 #[macro_export]
 macro_rules! down {
     ( $ctx:expr) => {{
-        input::is_key_down($ctx, Key::Down)
+        tetra::input::is_key_down($ctx, tetra::input::Key::Down)
     }};
 }
 

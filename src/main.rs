@@ -9,6 +9,7 @@ mod humanoid;
 mod macros;
 mod oneoffanim;
 mod panel;
+mod player;
 mod powerup;
 mod projectile;
 mod resources;

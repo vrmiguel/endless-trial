@@ -1,0 +1,179 @@
+use std::time::Duration;
+
+use tetra::{graphics::Texture, math::Vec2, Context};
+
+use crate::{
+    animation::FireballAnimation,
+    humanoid::{Humanoid, HumanoidType},
+    projectile::{Projectile, ProjectileManager},
+    resources, left, right, up, down,
+};
+
+pub struct PlayerManager {
+    player: Humanoid,
+    fireball_mgr: ProjectileManager,
+}
+
+impl PlayerManager {
+    pub fn is_player_dead(&self) -> bool {
+        self.player.is_dead()
+    }
+
+    pub fn hearts(&self) -> u8 {
+        self.player.hearts
+    }
+
+    pub fn player_position(&self) -> Vec2<f32> {
+        self.player.position
+    }
+
+    pub fn register_hit(&mut self) {
+        self.player.take_hit()
+    }
+
+    pub fn player_mut(&mut self) -> &mut Humanoid {
+        &mut self.player
+    }
+
+    fn send_triple_shot(&mut self, angle: f32) {
+        self.fireball_mgr.add_projectile(
+            angle - 45.0,
+            self.player.position,
+            Vec2 { x: 6.0, y: 6.0 },
+        );
+        self.fireball_mgr.add_projectile(
+            angle,
+            self.player.position,
+            Vec2 { x: 6.0, y: 6.0 },
+        );
+        self.fireball_mgr.add_projectile(
+            angle + 45.0,
+            self.player.position,
+            Vec2 { x: 6.0, y: 6.0 },
+        );
+    }
+
+    pub fn fireballs(&self) -> &[Projectile] {
+        self.fireball_mgr.projectiles()
+    }
+
+    pub fn update(
+        &mut self,
+        ctx: &mut Context,
+        faster_shooting_active: bool,
+        triple_shooting_active: bool,
+        faster_running_active: bool,
+    ) {
+        if faster_shooting_active {
+            self.player.set_shooting_wait_time(
+                Duration::from_secs_f32(0.08),
+            )
+        } else {
+            self.player.set_shooting_wait_time(
+                Duration::from_secs_f32(0.25),
+            );
+        }
+
+        if self.player.can_fire() {
+            if let Some(angle) = Self::check_for_fire(ctx) {
+                if triple_shooting_active {
+                    self.send_triple_shot(angle)
+                } else {
+                    self.fireball_mgr.add_projectile(
+                        angle,
+                        self.player.position,
+                        Vec2 { x: 5.0, y: 5.0 },
+                    )
+                }
+                self.player.register_fire();
+            }
+        }
+
+        let hero_speed =
+            if faster_running_active {
+                4.5
+            } else {
+                2.1
+            };
+
+        // Checks for WASD presses and updates player location
+        self.player.update_from_key_press(ctx, hero_speed);
+    }
+
+    pub fn new(ctx: &mut Context) -> Self {
+        let player_texture =
+            Texture::from_encoded(ctx, resources::HERO).unwrap();
+
+        let fireball_animation = FireballAnimation::build(ctx);
+
+        Self {
+            player: Humanoid::new(
+                2,
+                player_texture,
+                Vec2::new(240.0, 160.0),
+                Vec2::new(0.0, 0.0),
+                true,
+                Duration::from_secs_f32(0.25),
+                HumanoidType::Player,
+            ),
+            fireball_mgr: ProjectileManager::new(
+                fireball_animation,
+            ),
+        }
+    }
+
+    // TODO: there's probably a nicer solution to this with
+    // algebra
+    pub fn check_for_fire(ctx: &mut Context) -> Option<f32> {
+        match (left!(ctx), right!(ctx), up!(ctx), down!(ctx)) {
+            // These first cases are kind of nonsensical so I'm
+            // going to explicitly ignore them
+            (true, true, _, _) => None,
+            (_, _, true, true) => None,
+            (true, false, true, false) => {
+                // Left and Up -> 135 deg
+                Some(135.0)
+            }
+            (true, false, false, true) => {
+                // Left and Down -> 225 deg
+                Some(225.0)
+            }
+            (false, true, false, true) => {
+                // Right and Down -> 315 deg
+                Some(315.0)
+            }
+            (false, true, true, false) => {
+                // Right and Up -> 45 deg
+                Some(45.0)
+            }
+            (true, false, false, false) => {
+                // Only Left -> 180 deg
+                Some(180.0)
+            }
+            (false, true, false, false) => {
+                // Only Right -> 0 deg
+                Some(0.0)
+            }
+            (false, false, true, false) => {
+                // Only Up -> 90 deg
+                Some(90.0)
+            }
+            (false, false, false, true) => {
+                // Only Down -> 270 deg
+                Some(270.0)
+            }
+            (false, false, false, false) => {
+                // No arrow buttons pressed
+                None
+            }
+        }
+    }
+
+    pub fn draw(&mut self, ctx: &mut Context) {
+        self.player.advance_animation(ctx);
+        self.fireball_mgr.advance_animation(ctx);
+
+        self.player.draw(ctx);
+        self.fireball_mgr.draw(ctx);
+    }
+}

@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use graphics::Color;
 use rand::{
@@ -9,31 +9,27 @@ use tetra::{
     graphics,
     graphics::{
         scaling::{ScalingMode, ScreenScaler},
-        Texture,
+        
     },
     input::{self, Key},
-    math::Vec2,
     time, window, Context, Event, State,
 };
 
 use crate::{
-    animation::FireballAnimation,
     background::Background,
-    down,
     enemy::EnemyManager,
     healthbar::HealthBar,
-    humanoid::{Humanoid, HumanoidType},
-    left,
+    humanoid::{HumanoidType},
     oneoffanim::OneOffAnimationManager,
     panel::GameOverPanel,
+    player::PlayerManager,
     powerup::PowerUpManager,
-    projectile::ProjectileManager,
-    resources, right,
     timer::Timer,
-    up, HEIGHT, WIDTH,
+    HEIGHT, WIDTH,
 };
 
-const WAVES: [[(HumanoidType, f32); 4]; 6] = [
+/// Enemy types and their spawn rate percentages for each wave
+const WAVES: &[[(HumanoidType, f32); 4]] = &[
     [
         (HumanoidType::BasicEnemy, 0.85),
         (HumanoidType::StrongerEnemy, 0.10),
@@ -70,21 +66,26 @@ const WAVES: [[(HumanoidType, f32); 4]; 6] = [
         (HumanoidType::BadassEnemy, 0.35),
         (HumanoidType::Boss, 0.1),
     ],
+    [
+        (HumanoidType::BasicEnemy, 0.0),
+        (HumanoidType::StrongerEnemy, 0.55),
+        (HumanoidType::BadassEnemy, 0.25),
+        (HumanoidType::Boss, 0.2),
+    ],
 ];
 
 pub struct GameState {
+    /// The active screen scaler
     scaler: ScreenScaler,
     /// The textures of the game's background
     background: Background,
     health_bar: HealthBar,
-    player: Humanoid,
-    fireball_mgr: ProjectileManager,
+    player_manager: PlayerManager,
     power_up_mgr: PowerUpManager,
     enemy_mgr: EnemyManager,
     one_off_anim_mgr: OneOffAnimationManager,
     game_over_panel: GameOverPanel,
     rng: SmallRng,
-    player_default_shooting_time: Duration,
     game_score: u64,
     current_wave: u8,
     /// How long every wave lasts
@@ -93,25 +94,11 @@ pub struct GameState {
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> tetra::Result<GameState> {
-        let player_texture =
-            Texture::from_encoded(ctx, resources::HERO)?;
+        let now = Instant::now();
 
-        let player = Humanoid::new(
-            2,
-            player_texture,
-            Vec2::new(240.0, 160.0),
-            Vec2::new(0.0, 0.0),
-            true,
-            Duration::from_secs_f32(0.25),
-            HumanoidType::Player,
-        );
-        let background = Background::new(ctx);
-
-        let fireball_animation = FireballAnimation::build(ctx);
-
-        Ok(GameState {
-            player,
-            background,
+        let game_state = GameState {
+            player_manager: PlayerManager::new(ctx),
+            background: Background::new(ctx),
             health_bar: HealthBar::new(ctx),
             power_up_mgr: PowerUpManager::new(ctx),
             scaler: ScreenScaler::with_window_size(
@@ -120,21 +107,23 @@ impl GameState {
                 HEIGHT,
                 ScalingMode::ShowAll,
             )?,
-            fireball_mgr: ProjectileManager::new(
-                fireball_animation,
-            ),
             game_over_panel: GameOverPanel::new(ctx),
             enemy_mgr: EnemyManager::new(ctx),
             one_off_anim_mgr: OneOffAnimationManager::new(ctx),
             rng: SmallRng::from_entropy(),
-            player_default_shooting_time:
-                Duration::from_secs_f32(0.25),
             game_score: 0,
             current_wave: 0,
             wave_timer: Timer::start_now_with_interval(
                 Duration::from_secs(30),
             ),
-        })
+        };
+
+        println!(
+            "Built initial GameState in {}ms",
+            now.elapsed().as_millis()
+        );
+
+        Ok(game_state)
     }
 
     fn check_for_wave_change(&mut self) {
@@ -176,73 +165,8 @@ impl GameState {
         }
     }
 
-    fn triple_shoot(&mut self, angle: f32) {
-        self.fireball_mgr.add_projectile(
-            angle - 45.0,
-            self.player.position,
-            Vec2 { x: 6.0, y: 6.0 },
-        );
-        self.fireball_mgr.add_projectile(
-            angle,
-            self.player.position,
-            Vec2 { x: 6.0, y: 6.0 },
-        );
-        self.fireball_mgr.add_projectile(
-            angle + 45.0,
-            self.player.position,
-            Vec2 { x: 6.0, y: 6.0 },
-        );
-    }
-
     pub fn is_game_over(&self) -> bool {
-        self.player.is_dead()
-    }
-
-    // TODO: there's probably a nicer solution to this with
-    // algebra
-    pub fn check_for_fire(ctx: &mut Context) -> Option<f32> {
-        match (left!(ctx), right!(ctx), up!(ctx), down!(ctx)) {
-            // These first cases are kind of nonsensical so I'm
-            // going to explicitly ignore them
-            (true, true, _, _) => None,
-            (_, _, true, true) => None,
-            (true, false, true, false) => {
-                // Left and Up -> 135 deg
-                Some(135.0)
-            }
-            (true, false, false, true) => {
-                // Left and Down -> 225 deg
-                Some(225.0)
-            }
-            (false, true, false, true) => {
-                // Right and Down -> 315 deg
-                Some(315.0)
-            }
-            (false, true, true, false) => {
-                // Right and Up -> 45 deg
-                Some(45.0)
-            }
-            (true, false, false, false) => {
-                // Only Left -> 180 deg
-                Some(180.0)
-            }
-            (false, true, false, false) => {
-                // Only Right -> 0 deg
-                Some(0.0)
-            }
-            (false, false, true, false) => {
-                // Only Up -> 90 deg
-                Some(90.0)
-            }
-            (false, false, false, true) => {
-                // Only Down -> 270 deg
-                Some(270.0)
-            }
-            (false, false, false, false) => {
-                // No arrow buttons pressed
-                None
-            }
-        }
+        self.player_manager.is_player_dead()
     }
 }
 
@@ -260,14 +184,10 @@ impl State for GameState {
 
         self.background.draw(ctx);
 
-        self.player.advance_animation(ctx);
-        self.fireball_mgr.advance_animation(ctx);
-
-        self.player.draw(ctx);
-        self.fireball_mgr.draw(ctx);
+        self.player_manager.draw(ctx);
         self.enemy_mgr.draw(ctx);
         self.power_up_mgr.draw(ctx);
-        self.health_bar.draw(ctx, self.player.hearts);
+        self.health_bar.draw(ctx, self.player_manager.hearts());
         self.one_off_anim_mgr.draw(ctx);
 
         if self.is_game_over() {
@@ -308,52 +228,35 @@ impl State for GameState {
         // enemy) in order to reuse it in
         // .check_for_fireball_collisions
         let (collided_with_an_enemy, enemy_rects) = self
-            .player
+            .player_manager
+            .player_mut()
             .collided_with_bodies(self.enemy_mgr.enemies());
 
         if collided_with_an_enemy {
-            self.player.take_hit();
+            self.player_manager.register_hit();
         }
 
         // Check if an enemy was hit with a fireball from the
         // player
         self.enemy_mgr.check_for_fireball_collisions(
             &enemy_rects,
-            self.fireball_mgr.projectiles(),
+            self.player_manager.fireballs(),
             &mut self.one_off_anim_mgr,
         );
 
         // Check if the player was hit with a cannonball from an
         // enemy
         self.enemy_mgr.check_for_cannonball_collisions(
-            &mut self.player,
+            self.player_manager.player_mut(),
             &mut self.one_off_anim_mgr,
         );
 
-        if self.power_up_mgr.faster_shooting_active() {
-            self.player.set_shooting_wait_time(
-                Duration::from_secs_f32(0.08),
-            )
-        } else {
-            self.player.set_shooting_wait_time(
-                self.player_default_shooting_time,
-            );
-        }
-
-        if self.player.can_fire() {
-            if let Some(angle) = Self::check_for_fire(ctx) {
-                match self.power_up_mgr.triple_shooting_active()
-                {
-                    true => self.triple_shoot(angle),
-                    false => self.fireball_mgr.add_projectile(
-                        angle,
-                        self.player.position,
-                        Vec2 { x: 5.0, y: 5.0 },
-                    ),
-                }
-                self.player.register_fire();
-            }
-        }
+        self.player_manager.update(
+            ctx,
+            self.power_up_mgr.faster_shooting_active(),
+            self.power_up_mgr.triple_shooting_active(),
+            self.power_up_mgr.faster_running_active(),
+        );
 
         if self.enemy_mgr.can_spawn() {
             let kind = WAVES[self.current_wave as usize]
@@ -365,22 +268,14 @@ impl State for GameState {
 
         let enemy_score = self.enemy_mgr.calc_score();
 
-        self.power_up_mgr
-            .advance(&mut self.rng, &mut self.player);
-
-        let hero_speed =
-            if self.power_up_mgr.faster_running_active() {
-                4.5
-            } else {
-                2.1
-            };
-
-        // Checks for WASD presses and updates player location
-        self.player.update_from_key_press(ctx, hero_speed);
+        self.power_up_mgr.advance(
+            &mut self.rng,
+            self.player_manager.player_mut(),
+        );
 
         self.one_off_anim_mgr.update();
 
-        self.enemy_mgr.update(ctx, self.player.position);
+        self.enemy_mgr.update(ctx, self.player_manager.player_position());
 
         self.power_up_mgr.update();
 

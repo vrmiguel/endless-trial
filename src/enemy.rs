@@ -84,7 +84,7 @@ impl GruntTextures {
             }
             HumanoidType::Boss => &self.boss,
         }
-        .clone()
+        .clone() // Texture is an Rc so this clone is cheap
     }
 }
 
@@ -97,6 +97,7 @@ pub struct EnemyManager {
     avg_enemy_vel: f32,
     /// Spawns and cleans up projectiles coming from enemies
     projectile_mgr: ProjectileManager,
+    /// All enemy textures already loaded into memory
     textures: GruntTextures,
 }
 
